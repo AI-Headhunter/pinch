@@ -14,9 +14,17 @@ import {
 import { ConnectionManager } from "./connection.js";
 import { ConnectionStore } from "./connection-store.js";
 import type { RelayClient } from "./relay-client.js";
+import type { Keypair } from "./identity.js";
 import { join } from "node:path";
 import { mkdtemp } from "node:fs/promises";
 import { tmpdir } from "node:os";
+
+function makeTestKeypair(seed: number = 1): Keypair {
+	return {
+		publicKey: new Uint8Array(32).fill(seed),
+		privateKey: new Uint8Array(64).fill(seed),
+	};
+}
 
 /** Create a mock RelayClient with the methods ConnectionManager uses. */
 function createMockRelayClient(
@@ -80,10 +88,15 @@ describe("ConnectionManager", () => {
 		tempDir = await mkdtemp(join(tmpdir(), "pinch-conn-test-"));
 		store = new ConnectionStore(join(tempDir, "connections.json"));
 		await store.load();
-		mockRelay = createMockRelayClient("pinch:alice@localhost");
+		const keypair = makeTestKeypair(10);
+		mockRelay = createMockRelayClient(
+			"pinch:alice@localhost",
+			keypair.publicKey,
+		);
 		manager = new ConnectionManager(
 			mockRelay as unknown as RelayClient,
 			store,
+			keypair,
 		);
 	});
 
@@ -476,6 +489,7 @@ describe("ConnectionManager", () => {
 			const aliceManager = new ConnectionManager(
 				aliceRelay as unknown as RelayClient,
 				aliceStore,
+				makeTestKeypair(10),
 			);
 
 			// Set up Bob's side (approver).
@@ -488,6 +502,7 @@ describe("ConnectionManager", () => {
 			const bobManager = new ConnectionManager(
 				bobRelay as unknown as RelayClient,
 				bobStore,
+				makeTestKeypair(20),
 			);
 
 			// Step 1: Alice sends connection request.
@@ -537,6 +552,7 @@ describe("ConnectionManager", () => {
 			const aliceManager = new ConnectionManager(
 				aliceRelay as unknown as RelayClient,
 				aliceStore,
+				makeTestKeypair(10),
 			);
 
 			const bobTempDir = await mkdtemp(join(tmpdir(), "pinch-bob-"));
@@ -548,6 +564,7 @@ describe("ConnectionManager", () => {
 			const bobManager = new ConnectionManager(
 				bobRelay as unknown as RelayClient,
 				bobStore,
+				makeTestKeypair(20),
 			);
 
 			// Alice sends request.
