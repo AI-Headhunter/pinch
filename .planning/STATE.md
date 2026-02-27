@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-26)
 
 **Core value:** Agents can securely message each other with human consent and oversight at every step -- no message flows without explicit human approval of the connection.
-**Current focus:** Phase 5 complete. Full autonomy system with circuit breakers and enforcement pipeline.
+**Current focus:** Phase 6 in progress. Oversight and safety -- unified event log, human intervention, audit, rate limiting, muting.
 
 ## Current Position
 
-Phase: 5 of 6 (Full Autonomy and Permissions) -- COMPLETE
-Plan: 3 of 3 in current phase (complete)
-Status: Phase Complete
-Last activity: 2026-02-27 -- Completed 05-03-PLAN.md
+Phase: 6 of 6 (Oversight and Safety)
+Plan: 2 of 4 in current phase (complete)
+Status: Executing
+Last activity: 2026-02-27 -- Completed 06-02-PLAN.md
 
-Progress: [████████████████████] 100%
+Progress: [█████████████████████░░░] 90%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 16
+- Total plans completed: 18
 - Average duration: 6min
-- Total execution time: 1.7 hours
+- Total execution time: 1.9 hours
 
 **By Phase:**
 
@@ -32,9 +32,10 @@ Progress: [████████████████████] 100%
 | 03 | 4 | 23min | 6min |
 | 04 | 2 | 15min | 8min |
 | 05 | 3 | 15min | 5min |
+| 06 | 1 | 4min | 4min |
 
 **Recent Trend:**
-- Last 5 plans: 04-02 (10min), 05-01 (6min), 05-02 (4min), 05-03 (5min)
+- Last 5 plans: 05-01 (6min), 05-02 (4min), 05-03 (5min), 06-01 (4min)
 - Trend: stable
 
 *Updated after each plan completion*
@@ -51,6 +52,7 @@ Progress: [████████████████████] 100%
 | Phase 05 P01 | 6min | 2 tasks | 12 files |
 | Phase 05 P02 | 4min | 2 tasks | 11 files |
 | Phase 05 P03 | 5min | 2 tasks | 11 files |
+| Phase 06 P01 | 4min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -118,6 +120,10 @@ Recent decisions affecting current work:
 - [05-03]: Circuit breaker uses updateConnection() for downgrade to avoid setAutonomy() confirmation gate
 - [05-03]: Auto-respond policy evaluation logs every decision to activity feed regardless of outcome
 - [05-03]: Circuit breaker trip calls connectionStore.save() as fire-and-forget for persistence
+- [06-01]: actionType defaults to eventType when not explicitly provided (backward compat)
+- [06-01]: Genesis entry has prevHash="" -- old entries without hashes are pre-audit
+- [06-01]: Muted events excluded by default in pinch_activity; --include-muted overrides for audit
+- [06-01]: computeEntryHash exported for reuse by audit verification tool in later plans
 
 ### Pending Todos
 
@@ -130,5 +136,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-27
-Stopped at: Completed 05-03-PLAN.md (Phase 5 complete)
+Stopped at: Completed 06-01-PLAN.md
 Resume file: None

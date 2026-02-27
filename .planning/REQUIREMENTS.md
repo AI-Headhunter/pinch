@@ -63,12 +63,12 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Oversight
 
-- [ ] **OVRS-01**: Human can view an activity feed showing all sent/received messages and connection events
-- [ ] **OVRS-02**: Activity feed is filterable by connection, time range, and message type
+- [x] **OVRS-01**: Human can view an activity feed showing all sent/received messages and connection events
+- [x] **OVRS-02**: Activity feed is filterable by connection, time range, and message type
 - [ ] **OVRS-03**: Human can intervene in any conversation -- take over and send messages directly
 - [ ] **OVRS-04**: Messages are attributed as agent-sent or human-sent for conversation clarity
-- [ ] **OVRS-05**: Tamper-evident audit log with hash chaining records all messages and connection events
-- [ ] **OVRS-06**: Audit log entries include: timestamp, actor pubkey, action type, connection ID, message hash
+- [x] **OVRS-05**: Tamper-evident audit log with hash chaining records all messages and connection events
+- [x] **OVRS-06**: Audit log entries include: timestamp, actor pubkey, action type, connection ID, message hash
 
 ### Skill Integration
 
@@ -156,12 +156,12 @@ Which phases cover which requirements. Updated during roadmap creation.
 | AUTO-08 | Phase 5 | Complete |
 | AUTO-09 | Phase 5 | Complete |
 | AUTO-10 | Phase 5 | Complete |
-| OVRS-01 | Phase 6 | Pending |
-| OVRS-02 | Phase 6 | Pending |
+| OVRS-01 | Phase 6 | Complete |
+| OVRS-02 | Phase 6 | Complete |
 | OVRS-03 | Phase 6 | Pending |
 | OVRS-04 | Phase 6 | Pending |
-| OVRS-05 | Phase 6 | Pending |
-| OVRS-06 | Phase 6 | Pending |
+| OVRS-05 | Phase 6 | Complete |
+| OVRS-06 | Phase 6 | Complete |
 | SKIL-01 | Phase 3 | Complete |
 | SKIL-02 | Phase 3 | Complete |
 | SKIL-03 | Phase 3 | Complete |
