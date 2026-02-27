@@ -103,6 +103,7 @@ func main() {
 	slog.Info("rate limiter ready", "rate", rateLimit, "burst", rateBurst)
 
 	h := hub.NewHub(blockStore, mq, rl)
+	h.SetRelayHost(relayHost)
 	go h.Run(ctx)
 
 	r := chi.NewRouter()
@@ -207,12 +208,14 @@ func performAuth(ctx context.Context, conn *websocket.Conn, relayHost string) (e
 		return nil, "", err
 	}
 	if err := conn.Write(authCtx, websocket.MessageBinary, challengeData); err != nil {
+		_ = conn.Close(websocket.StatusPolicyViolation, "auth challenge write failed")
 		return nil, "", err
 	}
 
 	// Step 2: Read client's AuthResponse.
 	_, responseData, err := conn.Read(authCtx)
 	if err != nil {
+		_ = conn.Close(websocket.StatusPolicyViolation, "auth response read failed")
 		return nil, "", err
 	}
 
@@ -259,6 +262,7 @@ func performAuth(ctx context.Context, conn *websocket.Conn, relayHost string) (e
 		return nil, "", err
 	}
 	if err := conn.Write(authCtx, websocket.MessageBinary, resultData); err != nil {
+		_ = conn.Close(websocket.StatusPolicyViolation, "auth result write failed")
 		return nil, "", err
 	}
 

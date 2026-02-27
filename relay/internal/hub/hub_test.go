@@ -458,6 +458,59 @@ func TestRouteMessageDeliversToRecipient(t *testing.T) {
 	}
 }
 
+func TestRouteMessageBindsFromAddressToAuthenticatedClient(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	srv, h, _ := newTestServerWithBlockStore(t, ctx)
+
+	// Connect alice and bob.
+	aliceConn, err := dialWS(ctx, srv, "pinch:alice@localhost")
+	if err != nil {
+		t.Fatalf("dial alice: %v", err)
+	}
+	defer aliceConn.Close(websocket.StatusNormalClosure, "done")
+
+	bobConn, err := dialWS(ctx, srv, "pinch:bob@localhost")
+	if err != nil {
+		t.Fatalf("dial bob: %v", err)
+	}
+	defer bobConn.Close(websocket.StatusNormalClosure, "done")
+
+	waitForClientCount(t, h, 2, 2*time.Second)
+
+	// Alice sends a spoofed message claiming to be mallory.
+	msg := makeEnvelope(
+		t,
+		pinchv1.MessageType_MESSAGE_TYPE_MESSAGE,
+		"pinch:mallory@localhost",
+		"pinch:bob@localhost",
+		nil,
+	)
+	writeCtx, writeCancel := context.WithTimeout(ctx, 2*time.Second)
+	err = aliceConn.Write(writeCtx, websocket.MessageBinary, msg)
+	writeCancel()
+	if err != nil {
+		t.Fatalf("write: %v", err)
+	}
+
+	// Bob should receive the authenticated sender address, not the spoofed one.
+	readCtx, readCancel := context.WithTimeout(ctx, 2*time.Second)
+	_, data, err := bobConn.Read(readCtx)
+	readCancel()
+	if err != nil {
+		t.Fatalf("bob read: %v", err)
+	}
+
+	var received pinchv1.Envelope
+	if err := proto.Unmarshal(data, &received); err != nil {
+		t.Fatalf("unmarshal: %v", err)
+	}
+	if received.FromAddress != "pinch:alice@localhost" {
+		t.Fatalf("expected authenticated sender alice, got %s", received.FromAddress)
+	}
+}
+
 func TestRouteMessageSilentDropOfflineRecipient(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()

@@ -11,6 +11,7 @@ import (
 	"time"
 
 	pinchv1 "github.com/pinch-protocol/pinch/gen/go/pinch/v1"
+	"github.com/pinch-protocol/pinch/relay/internal/identity"
 	"github.com/pinch-protocol/pinch/relay/internal/store"
 	"google.golang.org/protobuf/proto"
 )
@@ -59,6 +60,10 @@ type Hub struct {
 
 	doneOnce sync.Once
 
+	// relayHost is the configured relay host used for recipient address
+	// host validation. Empty disables host enforcement.
+	relayHost string
+
 	// mu protects external reads of the routing table.
 	mu sync.RWMutex
 }
@@ -79,6 +84,12 @@ func NewHub(blockStore *store.BlockStore, mq *store.MessageQueue, rl *RateLimite
 	}
 }
 
+// SetRelayHost configures the expected host suffix for validated recipient
+// addresses (pinch:<payload>@<host>). Empty disables host validation.
+func (h *Hub) SetRelayHost(host string) {
+	h.relayHost = host
+}
+
 // Run starts the hub's main event loop. It processes register and unregister
 // events until the context is cancelled. Run should be called in its own
 // goroutine.
@@ -90,14 +101,10 @@ func (h *Hub) Run(ctx context.Context) {
 	for {
 		select {
 		case client := <-h.register:
-			pendingCount := 0
 			if h.mq != nil {
-				pendingCount = h.mq.Count(client.address)
-				if pendingCount > 0 {
-					// Mark flushing before exposing the client in h.clients so
-					// concurrent RouteMessage calls preserve queued ordering.
-					client.SetFlushing(true)
-				}
+				// Mark flushing before exposing the client in the map so concurrent
+				// routing preserves queue-before-realtime ordering.
+				client.SetFlushing(true)
 			}
 
 			h.mu.Lock()
@@ -107,10 +114,14 @@ func (h *Hub) Run(ctx context.Context) {
 			h.clients[client.address] = client
 			h.mu.Unlock()
 
-			// Check for queued messages and start flush if needed.
-			if pendingCount > 0 {
-				// Send QueueStatus to inform the client of pending messages.
-				h.sendQueueStatus(client, int32(pendingCount))
+			// Check for queued messages AFTER publishing client to avoid racing
+			// RouteMessage enqueues in the registration window.
+			if h.mq != nil {
+				pendingCount := h.mq.Count(client.address)
+				if pendingCount > 0 {
+					// Send QueueStatus to inform the client of pending messages.
+					h.sendQueueStatus(client, int32(pendingCount))
+				}
 				go h.flushQueuedMessages(client)
 			}
 
@@ -179,12 +190,14 @@ func (h *Hub) sendQueueStatus(client *Client, pendingCount int32) {
 // traffic can resume. If the client disconnects during flush, remaining
 // messages stay in bbolt for the next reconnect.
 //
-// Each entry is deleted from bbolt immediately after being sent to the client's
-// send buffer. This prevents duplicate delivery when the flush loop re-reads
-// the queue. Messages that arrive DURING flush (enqueued by RouteMessage) will
-// be picked up in subsequent FlushBatch calls.
+// Each entry is deleted from bbolt only after it is accepted by the client's
+// outbound buffer. If the buffer is full, flush waits and retries so entries
+// are not removed prematurely.
 func (h *Hub) flushQueuedMessages(client *Client) {
-	defer client.SetFlushing(false)
+	if h.mq == nil {
+		client.SetFlushing(false)
+		return
+	}
 
 	for {
 		// Check if client disconnected.
@@ -192,6 +205,7 @@ func (h *Hub) flushQueuedMessages(client *Client) {
 			slog.Info("flush aborted: client disconnected",
 				"address", client.address,
 			)
+			client.SetFlushing(false)
 			return
 		}
 
@@ -201,30 +215,36 @@ func (h *Hub) flushQueuedMessages(client *Client) {
 				"address", client.address,
 				"error", err,
 			)
+			client.SetFlushing(false)
 			return
 		}
 
 		if len(entries) == 0 {
-			// All queued messages have been sent.
-			slog.Info("flush complete",
-				"address", client.address,
-			)
+			// Release flushing; if queued entries appeared concurrently while we
+			// were draining, reacquire and continue to avoid stranding messages.
+			client.SetFlushing(false)
+			if h.mq.Count(client.address) > 0 && client.flushing.CompareAndSwap(false, true) {
+				continue
+			}
+			slog.Info("flush complete", "address", client.address)
 			return
 		}
 
 		for _, entry := range entries {
 			// Delete only after successful enqueue to the outbound buffer.
 			for {
-				if client.ctx.Err() != nil || client.closed.Load() {
-					slog.Info("flush aborted while waiting for outbound buffer space",
-						"address", client.address,
-					)
-					return
-				}
 				if client.Send(entry.Envelope) {
 					break
 				}
-				time.Sleep(flushBatchDelay)
+				select {
+				case <-client.ctx.Done():
+					slog.Info("flush aborted while waiting for outbound buffer space",
+						"address", client.address,
+					)
+					client.SetFlushing(false)
+					return
+				case <-time.After(flushBatchDelay):
+				}
 			}
 
 			if err := h.mq.Remove(client.address, entry.Key); err != nil {
@@ -345,6 +365,26 @@ func (h *Hub) RouteMessage(from *Client, envelope []byte) error {
 	toAddress := env.ToAddress
 	if toAddress == "" {
 		return nil
+	}
+	if h.relayHost != "" {
+		_, host, addrErr := identity.ValidateAddress(toAddress)
+		if addrErr != nil {
+			slog.Debug("route: invalid recipient address",
+				"from", from.Address(),
+				"to", toAddress,
+				"error", addrErr,
+			)
+			return nil
+		}
+		if host != h.relayHost {
+			slog.Debug("route: recipient host mismatch",
+				"from", from.Address(),
+				"to", toAddress,
+				"toHost", host,
+				"relayHost", h.relayHost,
+			)
+			return nil
+		}
 	}
 
 	if h.blockStore != nil && h.blockStore.IsBlocked(toAddress, from.Address()) {

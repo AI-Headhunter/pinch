@@ -24,6 +24,7 @@ import {
 import type { Envelope } from "@pinch/proto/pinch/v1/envelope_pb.js";
 import type { RelayClient } from "./relay-client.js";
 import type { ConnectionStore } from "./connection-store.js";
+import type { Keypair } from "./identity.js";
 
 /** Maximum length for connection request messages. */
 const MAX_MESSAGE_LENGTH = 280;
@@ -37,10 +38,22 @@ const REQUEST_TTL_SECONDS = 604800;
  * and a ConnectionStore (for persisting connection state).
  */
 export class ConnectionManager {
+	private keypair: Keypair;
+
 	constructor(
 		private relayClient: RelayClient,
 		private connectionStore: ConnectionStore,
-	) {}
+		keypair: Keypair,
+	) {
+		if (
+			!keypair ||
+			keypair.publicKey.length === 0 ||
+			keypair.privateKey.length === 0
+		) {
+			throw new Error("Keypair is required");
+		}
+		this.keypair = keypair;
+	}
 
 	/**
 	 * Send a connection request to another agent.
@@ -78,7 +91,7 @@ export class ConnectionManager {
 					fromAddress: ownAddress,
 					toAddress,
 					message,
-					senderPublicKey: this.relayClient.publicKey,
+					senderPublicKey: this.keypair.publicKey,
 					expiresAt,
 				}),
 			},
@@ -164,7 +177,7 @@ export class ConnectionManager {
 					fromAddress: ownAddress,
 					toAddress: peerAddress,
 					accepted: true,
-					responderPublicKey: this.relayClient.publicKey,
+					responderPublicKey: this.keypair.publicKey,
 				}),
 			},
 		});
