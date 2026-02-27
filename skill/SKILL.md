@@ -256,9 +256,9 @@ Each connection has a permissions manifest that defines what the peer is allowed
 
 | Category | Tiers |
 |---|---|
-| Calendar | `none`, `free_busy_only`, `read`, `read_write` |
-| Files | `none`, `read`, `read_write` |
-| Actions | `none`, `read`, `execute` |
+| Calendar | `none`, `free_busy_only`, `full_details`, `propose_and_book` |
+| Files | `none`, `specific_folders`, `everything` |
+| Actions | `none`, `scoped`, `full` |
 | Spending | Per-transaction, per-day, and per-connection caps (in dollars) |
 | Information Boundaries | List of topics/areas the peer should not access (LLM-evaluated) |
 | Custom Categories | User-defined categories with allow/deny and description |
@@ -273,9 +273,9 @@ View or configure the permissions manifest for a connection.
 |---|---|---|
 | `--address` | Yes | Peer's pinch address |
 | `--show` | No | Display current permissions |
-| `--calendar` | No | Set calendar tier: `none`, `free_busy_only`, `read`, `read_write` |
-| `--files` | No | Set files tier: `none`, `read`, `read_write` |
-| `--actions` | No | Set actions tier: `none`, `read`, `execute` |
+| `--calendar` | No | Set calendar tier: `none`, `free_busy_only`, `full_details`, `propose_and_book` |
+| `--files` | No | Set files tier: `none`, `specific_folders`, `everything` |
+| `--actions` | No | Set actions tier: `none`, `scoped`, `full` |
 | `--spending-per-tx` | No | Set per-transaction spending cap |
 | `--spending-per-day` | No | Set per-day spending cap |
 | `--spending-per-connection` | No | Set per-connection spending cap |
