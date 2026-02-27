@@ -10,6 +10,7 @@ import (
 	"os"
 	"os/signal"
 	"runtime"
+	"strconv"
 	"syscall"
 	"time"
 
@@ -38,17 +39,46 @@ func main() {
 		dbPath = "./pinch-relay.db"
 	}
 
+	queueMax := 1000
+	if v := os.Getenv("PINCH_RELAY_QUEUE_MAX"); v != "" {
+		if n, err := strconv.Atoi(v); err == nil && n > 0 {
+			queueMax = n
+		}
+	}
+
+	queueTTLHours := 168 // 7 days
+	if v := os.Getenv("PINCH_RELAY_QUEUE_TTL"); v != "" {
+		if n, err := strconv.Atoi(v); err == nil && n > 0 {
+			queueTTLHours = n
+		}
+	}
+
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
 
-	blockStore, err := store.NewBlockStore(dbPath)
+	db, err := store.OpenDB(dbPath)
 	if err != nil {
-		slog.Error("failed to open block store", "path", dbPath, "error", err)
+		slog.Error("failed to open database", "path", dbPath, "error", err)
 		os.Exit(1)
 	}
-	defer blockStore.Close()
+	defer db.Close()
 
-	h := hub.NewHub(blockStore)
+	blockStore, err := store.NewBlockStore(db)
+	if err != nil {
+		slog.Error("failed to initialize block store", "error", err)
+		os.Exit(1)
+	}
+
+	queueTTL := time.Duration(queueTTLHours) * time.Hour
+	mq, err := store.NewMessageQueue(db, queueMax, queueTTL)
+	if err != nil {
+		slog.Error("failed to initialize message queue", "error", err)
+		os.Exit(1)
+	}
+	slog.Info("message queue ready", "maxPerAgent", queueMax, "ttl", queueTTL)
+	mq.StartSweep(ctx)
+
+	h := hub.NewHub(blockStore, mq)
 	go h.Run(ctx)
 
 	r := chi.NewRouter()

@@ -4,6 +4,8 @@ import (
 	"context"
 	"crypto/ed25519"
 	"log/slog"
+	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/coder/websocket"
@@ -37,6 +39,16 @@ type Client struct {
 	send      chan []byte
 	ctx       context.Context
 	cancel    context.CancelFunc
+
+	// flushing is set atomically while the hub is draining queued messages
+	// to this client. While true, new real-time messages are enqueued to
+	// bbolt instead of delivered directly to preserve ordering.
+	flushing atomic.Bool
+
+	// flushKeys maps messageId (hex string) to bbolt key for delivery
+	// confirmation correlation during flush. Protected by flushMu.
+	flushKeys map[string][]byte
+	flushMu   sync.Mutex
 }
 
 // NewClient creates a new Client bound to the given hub and WebSocket connection.
@@ -163,4 +175,40 @@ func (c *Client) Send(data []byte) {
 // Address returns the client's pinch: address.
 func (c *Client) Address() string {
 	return c.address
+}
+
+// IsFlushing returns true if the client is currently receiving a flush
+// of queued messages. Lock-free atomic read.
+func (c *Client) IsFlushing() bool {
+	return c.flushing.Load()
+}
+
+// SetFlushing sets the client's flushing state atomically.
+func (c *Client) SetFlushing(v bool) {
+	c.flushing.Store(v)
+}
+
+// TrackFlushKey stores a messageId -> bbolt key mapping for delivery
+// confirmation correlation during flush.
+func (c *Client) TrackFlushKey(messageId string, bboltKey []byte) {
+	c.flushMu.Lock()
+	defer c.flushMu.Unlock()
+	if c.flushKeys == nil {
+		c.flushKeys = make(map[string][]byte)
+	}
+	c.flushKeys[messageId] = bboltKey
+}
+
+// PopFlushKey returns and removes the bbolt key for a confirmed message.
+func (c *Client) PopFlushKey(messageId string) ([]byte, bool) {
+	c.flushMu.Lock()
+	defer c.flushMu.Unlock()
+	if c.flushKeys == nil {
+		return nil, false
+	}
+	key, ok := c.flushKeys[messageId]
+	if ok {
+		delete(c.flushKeys, messageId)
+	}
+	return key, ok
 }

@@ -80,10 +80,11 @@ Plans:
 **Success Criteria** (what must be TRUE):
   1. When Agent B is offline, messages sent by Agent A are queued at the relay in bbolt with a 7-day default TTL; expired messages are cleaned up
   2. When Agent B reconnects, all queued messages are flushed to it in the order they were sent; no messages are lost or duplicated
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 04-01: TBD
+- [ ] 04-01-PLAN.md -- Proto schema extensions (QueueStatus, QueueFull, was_stored), shared bbolt DB opener, MessageQueue store with TTL sweep
+- [ ] 04-02-PLAN.md -- Hub integration with batched flush, flushing state, queue-full feedback, TypeScript handling, cross-language integration tests
 
 ### Phase 5: Full Autonomy and Permissions
 **Goal**: Every connection has a graduated autonomy level (Full Manual / Notify / Auto-respond / Full Auto) enforced by the agent, with an inbound permissions manifest controlling what each connection can send
@@ -126,6 +127,6 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 | 1. Foundation and Crypto Primitives | 3/3 | Complete    | 2026-02-27 |
 | 2. Authentication and Connection | 4/4 | Complete    | 2026-02-27 |
 | 3. Encrypted 1:1 Messaging | 1/4 | Complete    | 2026-02-27 |
-| 4. Store-and-Forward | 0/1 | Not started | - |
+| 4. Store-and-Forward | 1/2 | In Progress | - |
 | 5. Full Autonomy and Permissions | 0/2 | Not started | - |
 | 6. Oversight and Safety | 0/2 | Not started | - |

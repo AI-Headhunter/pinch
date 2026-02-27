@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-26)
 
 **Core value:** Agents can securely message each other with human consent and oversight at every step -- no message flows without explicit human approval of the connection.
-**Current focus:** Phase 3 Complete -- Ready for Phase 4
+**Current focus:** Phase 4 complete -- Store-and-Forward fully wired. Ready for Phase 5.
 
 ## Current Position
 
-Phase: 3 of 6 (Encrypted 1:1 Messaging) -- COMPLETE
-Plan: 4 of 4 in current phase (all done)
+Phase: 4 of 6 (Store-and-Forward) -- COMPLETE
+Plan: 2 of 2 in current phase (complete)
 Status: Phase Complete
-Last activity: 2026-02-27 -- Completed 03-04-PLAN.md (Phase 3 fully done)
+Last activity: 2026-02-27 -- Completed 04-02-PLAN.md
 
-Progress: [████████░░] 76%
+Progress: [█████████░] 90%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 11
+- Total plans completed: 13
 - Average duration: 6min
-- Total execution time: 1.1 hours
+- Total execution time: 1.4 hours
 
 **By Phase:**
 
@@ -30,9 +30,10 @@ Progress: [████████░░] 76%
 | 01 | 3 | 18min | 6min |
 | 02 | 4 | 24min | 6min |
 | 03 | 4 | 23min | 6min |
+| 04 | 2 | 15min | 8min |
 
 **Recent Trend:**
-- Last 5 plans: 03-01 (9min), 03-02 (5min), 03-03 (5min), 03-04 (4min)
+- Last 5 plans: 03-03 (5min), 03-04 (4min), 04-01 (5min), 04-02 (10min)
 - Trend: stable
 
 *Updated after each plan completion*
@@ -44,6 +45,8 @@ Progress: [████████░░] 76%
 | Phase 03 P02 | 5min | 2 tasks | 9 files |
 | Phase 03 P03 | 5min | 2 tasks | 6 files |
 | Phase 03 P04 | 4min | 2 tasks | 13 files |
+| Phase 04 P01 | 5min | 2 tasks | 10 files |
+| Phase 04 P02 | 10min | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -91,6 +94,14 @@ Recent decisions affecting current work:
 - [03-04]: Self-executable TypeScript modules (process.argv[1] check) instead of separate bin wrapper scripts
 - [03-04]: Shared bootstrap() function creates all components; tools are thin wrappers over existing managers
 - [03-04]: parseArgs() exported separately from run() for unit testability without requiring relay connection
+- [04-01]: BlockStore.Close() removed -- caller (main.go) owns shared DB handle via OpenDB
+- [04-01]: JSON encoding for queue values (human-debuggable with bbolt CLI, write path serialized by bbolt)
+- [04-01]: 5-minute sweep interval hardcoded (7-day TTL makes finer granularity negligible)
+- [04-01]: Corrupt queue entries skipped in FlushBatch with slog.Warn, cleaned by sweep
+- [04-02]: Immediate deletion on flush (Remove after Send) instead of deferred deletion via delivery confirmation
+- [04-02]: Flushing flag uses sync/atomic for lock-free reads on hot routing path
+- [04-02]: Messages during flush enqueued to bbolt (not real-time) to preserve chronological ordering
+- [04-02]: PINCH_RELAY_QUEUE_MAX and PINCH_RELAY_QUEUE_TTL env vars for configurable queue settings
 
 ### Pending Todos
 
@@ -103,5 +114,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-27
-Stopped at: Completed 03-04-PLAN.md (Phase 3 complete)
+Stopped at: Completed 04-02-PLAN.md (Phase 4 complete)
 Resume file: None
