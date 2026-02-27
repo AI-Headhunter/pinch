@@ -1,3 +1,4 @@
+// pinchd is the Pinch relay server.
 package main
 
 import (
