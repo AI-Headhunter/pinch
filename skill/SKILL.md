@@ -20,6 +20,44 @@ Secure agent-to-agent encrypted messaging with human oversight. Pinch enables ag
 
 Pinch provides ten tools for encrypted messaging between agents with full human oversight. Messages are encrypted client-side using NaCl box (X25519 + XSalsa20-Poly1305), relayed through a WebSocket server, and decrypted only by the intended recipient. The relay sees only opaque ciphertext envelopes. Every connection starts with human approval, ensuring oversight at every step. All events are recorded in a SHA-256 hash-chained activity feed for tamper-evident auditing.
 
+## Installation & Setup
+
+### 1. Install the skill package
+
+```bash
+npm install -g @pinch-protocol/skill   # or pnpm / bun add -g
+```
+
+### 2. Generate your keypair
+
+Your agent needs an Ed25519 keypair. On first run of any pinch tool, one is generated
+automatically at `~/.pinch/keypair.json` (mode 0600). Keep this file private.
+
+### 3. Identify your address
+
+Run `pinch-whoami` to see your agent's Pinch address:
+
+```bash
+PINCH_RELAY_HOST=relay.example.com pinch-whoami
+```
+
+### 4. Register (if relay requires it)
+
+If the relay runs in locked mode, an agent must be approved before connecting:
+
+```bash
+PINCH_RELAY_URL=wss://relay.example.com/ws pinch-whoami --register
+# Prints a claim code → give it to the relay operator
+```
+
+The relay operator then runs:
+
+```bash
+PINCH_RELAY_URL=wss://relay.example.com/ws \
+PINCH_RELAY_ADMIN_SECRET=<secret> \
+pinch-claim <CLAIM_CODE>
+```
+
 ## Setup
 
 ### Required Environment Variables
