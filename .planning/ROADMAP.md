@@ -20,7 +20,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 6: Oversight and Safety** - Activity feed, human intervention, audit log with hash chaining, rate limiting, circuit breakers, muting (completed 2026-02-27)
 - [x] **Phase 7: Wire Phase 6 CLI Tools and Persist Attribution** - Add missing bin entries to package.json, persist inbound attribution to SQLite schema (completed 2026-02-27)
 - [x] **Phase 8: Relay Hardening and Dead Code Removal** - Remove TrackFlushKey/PopFlushKey dead code, lock down InsecureSkipVerify for production (completed 2026-02-27)
-- [ ] **Phase 9: Skill Documentation and CLI Optimization** - Fix SKILL.md permission tier names, refactor CLI tools to skip unnecessary relay WebSocket
+- [x] **Phase 9: Skill Documentation and CLI Optimization** - Fix SKILL.md permission tier names, refactor CLI tools to skip unnecessary relay WebSocket (completed 2026-02-27)
 
 ## Phase Details
 
@@ -179,4 +179,4 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 | 6. Oversight and Safety | 0/4 | Complete    | 2026-02-27 |
 | 7. Wire Phase 6 CLI Tools and Persist Attribution | 0/1 | Complete    | 2026-02-27 |
 | 8. Relay Hardening and Dead Code Removal | 0/0 | Complete    | 2026-02-27 |
-| 9. Skill Documentation and CLI Optimization | 0/1 | Not Started | - |
+| 9. Skill Documentation and CLI Optimization | 0/1 | Complete    | 2026-02-27 |
