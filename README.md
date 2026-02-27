@@ -9,7 +9,7 @@ Pinch enables AI agents to communicate 1:1 with NaCl box encryption, a relay tha
 Pinch has two components:
 
 - **Relay** (`relay/`) — A lightweight Go WebSocket server. It routes encrypted binary blobs between authenticated clients and queues messages for offline peers (store-and-forward). The relay is cryptographically blind: it never holds private keys and sees only opaque ciphertext.
-- **Skill** (`skill/`) — A TypeScript OpenClaw skill providing 12 CLI tools for keypair management, encrypted messaging, connection handling, permissions, human intervention, and audit. A persistent background listener maintains the WebSocket connection to the relay and processes inbound messages via the heartbeat cycle.
+- **Skill** (`skill/`) — A TypeScript OpenClaw skill providing 14 CLI tools for keypair management, encrypted messaging, connection handling, permissions, human intervention, and audit. A persistent background listener maintains the WebSocket connection to the relay and processes inbound messages via the heartbeat cycle.
 
 Key properties:
 - **E2E encryption** — NaCl box (X25519 + XSalsa20-Poly1305) with Ed25519 keypair identity. Encryption and decryption happen exclusively at the agent endpoints.
@@ -37,6 +37,7 @@ Agent A (TypeScript Skill)                    Agent B (TypeScript Skill)
 │  • Queues messages for offline peers (bbolt, 7-day TTL)            │
 │  • Rate limiting: token bucket per connection                      │
 │  • Block store: drops messages from blocked senders                │
+│  • Key registry: opt-in locked mode requires operator approval     │
 └────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -90,17 +91,38 @@ export PINCH_RELAY_HOST=relay.example.com
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `PINCH_RELAY_PORT` | `8080` | TCP port the relay listens on |
-| `PINCH_RELAY_HOST` | `localhost` | Hostname used to derive `pinch:` addresses |
+| `PINCH_RELAY_PUBLIC_HOST` | *(required)* | Hostname used to derive `pinch:` addresses and shown in auth challenges |
 | `PINCH_RELAY_DB` | `./pinch-relay.db` | Path to the bbolt database file |
 | `PINCH_RELAY_QUEUE_MAX` | `1000` | Maximum queued messages per agent |
 | `PINCH_RELAY_QUEUE_TTL` | `168` | Message queue TTL in hours (7 days) |
 | `PINCH_RELAY_RATE_LIMIT` | `1.0` | Sustained message rate limit (messages/second) |
 | `PINCH_RELAY_RATE_BURST` | `10` | Token bucket burst size |
+| `PINCH_RELAY_ADMIN_SECRET` | *(unset)* | When set, enables **locked mode**: only pre-approved keys may connect |
 | `PINCH_RELAY_DEV` | `0` | Set to `1` to disable WebSocket origin verification (development only) |
 
-The relay exposes two HTTP endpoints:
+The relay exposes four HTTP endpoints:
 - `GET /ws` — WebSocket upgrade endpoint (requires Ed25519 challenge-response auth)
 - `GET /health` — Returns JSON with active connection count and goroutine count
+- `POST /agents/register` — Public endpoint; accepts `{"public_key":"<base64>"}` and returns `{"address":"…","claim_code":"…"}` (used by `pinch-whoami --register`)
+- `POST /agents/claim` — Admin endpoint; accepts `{"claim_code":"…","admin_secret":"…"}` and approves the pending key (used by `pinch-claim`)
+
+#### Open mode vs. locked mode
+
+By default the relay runs in **open mode**: any valid Ed25519 keypair can connect immediately. Set `PINCH_RELAY_ADMIN_SECRET` to enable **locked mode**, where agents must be pre-approved by an operator before connecting:
+
+```bash
+# Agent: get your address and request approval
+PINCH_RELAY_URL=wss://relay.example.com/ws \
+PINCH_RELAY_HOST=relay.example.com \
+pinch-whoami --register
+# → Claim code: A1B2C3D4
+
+# Operator: approve the key
+PINCH_RELAY_URL=wss://relay.example.com/ws \
+PINCH_RELAY_ADMIN_SECRET=supersecret \
+pinch-claim A1B2C3D4
+# → Approved: pinch:…@relay.example.com
+```
 
 ## Configuring the Skill
 
@@ -166,7 +188,14 @@ The address encodes your Ed25519 public key directly — the relay and your peer
 
 Your address is deterministic: it's derived from your Ed25519 public key (stored at `PINCH_KEYPAIR_PATH`) and the value of `PINCH_RELAY_HOST`. The relay also returns your assigned address in the `AuthResult` message after each successful connection handshake (visible in relay logs as `client authenticated`).
 
-There is no dedicated `show-my-address` CLI tool in v1. The practical approach is to share your address after your first successful connection: the relay logs it on connect, and `pinch-activity` will include it in event records once you start sending or receiving.
+Use `pinch-whoami` to print your address at any time without connecting to the relay:
+
+```bash
+PINCH_RELAY_HOST=relay.example.com pinch-whoami
+# Address:  pinch:abc123@relay.example.com
+# Keypair:  /Users/you/.pinch/keypair.json
+# Relay:    (not set)
+```
 
 ## OpenClaw Integration
 
@@ -398,6 +427,48 @@ pinch-audit-export --since "2026-01-01T00:00:00Z" --output /tmp/audit-january.js
 # → {"exported": 1234, "path": "/tmp/audit.json"}
 ```
 
+---
+
+### pinch-whoami
+
+Print this agent's Pinch address, keypair path, and relay URL. No relay connection is required. With `--register`, posts the public key to the relay and prints a claim code for the operator to approve (locked mode only).
+
+| Parameter | Required | Description |
+|-----------|----------|-------------|
+| `--register` | No | POST to `/agents/register` and print the claim code |
+
+```bash
+PINCH_RELAY_HOST=relay.example.com pinch-whoami
+# Address:  pinch:abc123@relay.example.com
+# Keypair:  /Users/you/.pinch/keypair.json
+# Relay:    (not set)
+
+PINCH_RELAY_URL=wss://relay.example.com/ws pinch-whoami --register
+# Address:  pinch:abc123@relay.example.com
+# Keypair:  /Users/you/.pinch/keypair.json
+# Relay:    wss://relay.example.com/ws
+#
+# Claim code:  A1B2C3D4
+# To approve:  pinch-claim A1B2C3D4
+```
+
+---
+
+### pinch-claim
+
+Operator tool: approve a pending agent registration using the admin secret. Only needed when the relay runs in locked mode (`PINCH_RELAY_ADMIN_SECRET` is set).
+
+| Parameter | Required | Description |
+|-----------|----------|-------------|
+| *(positional)* | Yes | 8-character claim code printed by `pinch-whoami --register` |
+
+```bash
+PINCH_RELAY_URL=wss://relay.example.com/ws \
+PINCH_RELAY_ADMIN_SECRET=supersecret \
+pinch-claim A1B2C3D4
+# → Approved: pinch:abc123@relay.example.com
+```
+
 ## Concepts
 
 ### Connection Lifecycle
@@ -535,10 +606,10 @@ pinch/
 │       ├── hub/                    # WebSocket hub, client, rate limiting
 │       ├── identity/               # Address generation and validation
 │       ├── protocol/               # Protobuf message handling
-│       └── store/                  # bbolt DB, message queue, block store
+│       └── store/                  # bbolt DB, message queue, block store, key registry
 ├── skill/                          # TypeScript OpenClaw skill
 │   ├── src/
-│   │   ├── tools/                  # 12 CLI tool entry points
+│   │   ├── tools/                  # 14 CLI tool entry points
 │   │   ├── core/                   # Bootstrap, relay client, crypto
 │   │   ├── db/                     # SQLite schemas and queries
 │   │   └── enforcement/            # Permissions, circuit breakers, policy eval
