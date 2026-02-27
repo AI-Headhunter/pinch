@@ -18,6 +18,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [ ] **Phase 4: Store-and-Forward** - bbolt message queue at relay, TTL expiration, reconnect flush, delivery confirmations
 - [x] **Phase 5: Full Autonomy and Permissions** - 4-tier autonomy state machine, inbound permissions manifest, autonomy change controls (completed 2026-02-27)
 - [x] **Phase 6: Oversight and Safety** - Activity feed, human intervention, audit log with hash chaining, rate limiting, circuit breakers, muting (completed 2026-02-27)
+- [ ] **Phase 7: Wire Phase 6 CLI Tools and Persist Attribution** - Add missing bin entries to package.json, persist inbound attribution to SQLite schema
 
 ## Phase Details
 
@@ -120,6 +121,18 @@ Plans:
 - [ ] 06-03-PLAN.md -- Human intervention (passthrough mode), message attribution, connection muting
 - [ ] 06-04-PLAN.md -- Audit verify/export tools, SKILL.md and HEARTBEAT.md updates
 
+### Phase 7: Wire Phase 6 CLI Tools and Persist Attribution
+**Goal:** Close all remaining v1.0 audit gaps — make Phase 6 CLI tools invocable via package.json bin entries and persist inbound message attribution to SQLite
+**Depends on:** Phase 6
+**Requirements:** OVRS-01, OVRS-02, OVRS-03, OVRS-04, OVRS-05, CONN-05
+**Gap Closure:** Closes gaps from audit
+**Success Criteria** (what must be TRUE):
+  1. All 5 Phase 6 CLI tools (pinch-activity, pinch-intervene, pinch-mute, pinch-audit-verify, pinch-audit-export) appear in skill/package.json bin field and are invocable after `pnpm install`
+  2. Messages SQLite schema has an `attribution` column; `MessageRecord` interface includes an `attribution` field; `handleIncomingMessage()` persists inbound attribution from the `application/x-pinch+json` wrapper
+  3. `pinch-history` can surface attribution data for messages that were sent with human intervention
+
+Plans: TBD
+
 ## Progress
 
 **Execution Order:**
@@ -133,3 +146,4 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 | 4. Store-and-Forward | 2/2 | Complete    | 2026-02-27 |
 | 5. Full Autonomy and Permissions | 0/3 | Complete    | 2026-02-27 |
 | 6. Oversight and Safety | 0/4 | Complete    | 2026-02-27 |
+| 7. Wire Phase 6 CLI Tools and Persist Attribution | 0/0 | Not Started | — |
