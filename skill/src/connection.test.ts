@@ -89,6 +89,19 @@ describe("ConnectionManager", () => {
 
 	// Cleanup handled by OS temp dir.
 
+	describe("constructor", () => {
+		it("throws when keypair is missing", () => {
+			expect(
+				() =>
+					new ConnectionManager(
+						mockRelay as unknown as RelayClient,
+						store,
+						undefined as unknown as Keypair,
+					),
+			).toThrow("Keypair is required");
+		});
+	});
+
 	describe("sendRequest", () => {
 		it("creates pending_outbound connection and sends ConnectionRequest envelope", async () => {
 			await manager.sendRequest(

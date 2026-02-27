@@ -92,7 +92,7 @@ async function createAgent(name: string): Promise<{
 	const storePath = join(tempDir, `${name}-connections.json`);
 	const store = new ConnectionStore(storePath);
 	await store.load();
-	const manager = new ConnectionManager(client, store);
+	const manager = new ConnectionManager(client, store, keypair);
 
 	await client.connect();
 	manager.setupHandlers();

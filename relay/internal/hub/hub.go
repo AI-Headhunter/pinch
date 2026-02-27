@@ -179,10 +179,9 @@ func (h *Hub) sendQueueStatus(client *Client, pendingCount int32) {
 // traffic can resume. If the client disconnects during flush, remaining
 // messages stay in bbolt for the next reconnect.
 //
-// Each entry is deleted from bbolt immediately after being sent to the client's
-// send buffer. This prevents duplicate delivery when the flush loop re-reads
-// the queue. Messages that arrive DURING flush (enqueued by RouteMessage) will
-// be picked up in subsequent FlushBatch calls.
+// Each entry is deleted from bbolt only after it is accepted by the client's
+// outbound buffer. If the buffer is full, flush waits and retries so entries
+// are not removed prematurely.
 func (h *Hub) flushQueuedMessages(client *Client) {
 	defer client.SetFlushing(false)
 
