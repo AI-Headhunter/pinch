@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-26)
 
 **Core value:** Agents can securely message each other with human consent and oversight at every step -- no message flows without explicit human approval of the connection.
-**Current focus:** Phase 6 in progress. Oversight and safety -- unified event log, human intervention, audit, rate limiting, muting.
+**Current focus:** Phase 7 complete. Wire CLI tools and persist attribution -- all v1.0 audit gaps closed.
 
 ## Current Position
 
-Phase: 6 of 6 (Oversight and Safety)
-Plan: 4 of 4 in current phase (complete)
-Status: Executing
-Last activity: 2026-02-27 -- Completed 06-03-PLAN.md
+Phase: 7 of 7 (Wire CLI Tools and Persist Attribution)
+Plan: 1 of 1 in current phase (complete)
+Status: Complete
+Last activity: 2026-02-27 -- Completed 07-01-PLAN.md
 
-Progress: [████████████████████████] 95%
+Progress: [█████████████████████████] 100%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 20
+- Total plans completed: 21
 - Average duration: 6min
-- Total execution time: 2.2 hours
+- Total execution time: 2.3 hours
 
 **By Phase:**
 
@@ -33,9 +33,10 @@ Progress: [███████████████████████
 | 04 | 2 | 15min | 8min |
 | 05 | 3 | 15min | 5min |
 | 06 | 4 | 23min | 6min |
+| 07 | 1 | 3min | 3min |
 
 **Recent Trend:**
-- Last 5 plans: 06-01 (4min), 06-02 (4min), 06-04 (3min), 06-03 (12min)
+- Last 5 plans: 06-02 (4min), 06-04 (3min), 06-03 (12min), 07-01 (3min)
 - Trend: stable
 
 *Updated after each plan completion*
@@ -56,6 +57,7 @@ Progress: [███████████████████████
 | Phase 06 P02 | 4min | 2 tasks | 10 files |
 | Phase 06 P04 | 3min | 2 tasks | 6 files |
 | Phase 06 P03 | 12min | 2 tasks | 9 files |
+| Phase 07 P01 | 3min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -138,6 +140,9 @@ Recent decisions affecting current work:
 - [06-04]: No changes to cli.ts bootstrap -- ActivityFeed evolves in-place via initSchema()
 - [06-04]: Tail verification skips genesis prev_hash check (partial chain starts at arbitrary point)
 - [06-04]: Export uses raw SQL column names (snake_case) in JSON for independent verification
+- [07-01]: Attribution column is nullable TEXT (not NOT NULL) for backward compatibility with existing messages
+- [07-01]: Outbound attribution defaults to "agent" when not specified, consistent with wire format behavior
+- [07-01]: pinch-history surfaces attribution as null for old messages without attribution
 
 ### Pending Todos
 
@@ -150,5 +155,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-27
-Stopped at: Completed 06-03-PLAN.md
+Stopped at: Completed 07-01-PLAN.md
 Resume file: None
