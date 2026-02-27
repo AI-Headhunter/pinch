@@ -21,6 +21,7 @@ export interface MessageRecord {
 	sequence: number;
 	state: string;
 	failureReason?: string;
+	attribution?: "agent" | "human";
 	createdAt: string;
 	updatedAt: string;
 }
@@ -93,6 +94,18 @@ export class MessageStore {
 				next_sequence INTEGER NOT NULL DEFAULT 1
 			);
 		`);
+
+		// Evolve schema: add attribution column if not present.
+		const columns = this.db
+			.prepare("PRAGMA table_info(messages)")
+			.all() as { name: string }[];
+		const columnNames = new Set(columns.map((c) => c.name));
+
+		if (!columnNames.has("attribution")) {
+			this.db.exec(
+				"ALTER TABLE messages ADD COLUMN attribution TEXT",
+			);
+		}
 	}
 
 	/**
@@ -102,10 +115,10 @@ export class MessageStore {
 		const stmt = this.db.prepare(`
 			INSERT INTO messages (
 				id, connection_address, direction, body, thread_id, reply_to,
-				priority, sequence, state, failure_reason, created_at, updated_at
+				priority, sequence, state, failure_reason, attribution, created_at, updated_at
 			) VALUES (
 				@id, @connectionAddress, @direction, @body, @threadId, @replyTo,
-				@priority, @sequence, @state, @failureReason, @createdAt, @updatedAt
+				@priority, @sequence, @state, @failureReason, @attribution, @createdAt, @updatedAt
 			)
 		`);
 		stmt.run({
@@ -119,6 +132,7 @@ export class MessageStore {
 			sequence: msg.sequence,
 			state: msg.state,
 			failureReason: msg.failureReason ?? null,
+			attribution: msg.attribution ?? null,
 			createdAt: msg.createdAt,
 			updatedAt: msg.updatedAt,
 		});
@@ -261,6 +275,7 @@ export class MessageStore {
 			sequence: row.sequence as number,
 			state: row.state as string,
 			failureReason: (row.failure_reason as string) ?? undefined,
+			attribution: (row.attribution as string as "agent" | "human") ?? undefined,
 			createdAt: row.created_at as string,
 			updatedAt: row.updated_at as string,
 		};

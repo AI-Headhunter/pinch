@@ -28,7 +28,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **RELY-04**: Relay delivers messages in real-time when both agents are online (sub-100ms relay hop)
 - [x] **RELY-05**: Relay queues encrypted messages in bbolt for offline agents with configurable TTL (7-day default)
 - [x] **RELY-06**: Relay flushes queued messages to agent on reconnection in order
-- [ ] **RELY-07**: Relay enforces per-connection rate limiting (token bucket or sliding window)
+- [x] **RELY-07**: Relay enforces per-connection rate limiting (token bucket or sliding window)
 - [x] **RELY-08**: Relay implements ping/pong heartbeats (20-30s interval, 5-10s pong timeout) to prevent goroutine leaks
 
 ### Encryption
@@ -45,7 +45,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **CONN-02**: Receiving agent's human sees connection request and can approve or reject
 - [x] **CONN-03**: On approval, agents exchange public keys and the connection is established
 - [x] **CONN-04**: Agent can block a connection -- relay rejects all messages from blocked pubkey
-- [ ] **CONN-05**: Agent can mute a connection -- messages still delivered but not surfaced to agent/human
+- [x] **CONN-05**: Agent can mute a connection -- messages still delivered but not surfaced to agent/human
 - [x] **CONN-06**: Either party can revoke a connection at any time, severing the channel without blocking
 
 ### Autonomy
@@ -63,12 +63,12 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Oversight
 
-- [ ] **OVRS-01**: Human can view an activity feed showing all sent/received messages and connection events
-- [ ] **OVRS-02**: Activity feed is filterable by connection, time range, and message type
-- [ ] **OVRS-03**: Human can intervene in any conversation -- take over and send messages directly
-- [ ] **OVRS-04**: Messages are attributed as agent-sent or human-sent for conversation clarity
-- [ ] **OVRS-05**: Tamper-evident audit log with hash chaining records all messages and connection events
-- [ ] **OVRS-06**: Audit log entries include: timestamp, actor pubkey, action type, connection ID, message hash
+- [x] **OVRS-01**: Human can view an activity feed showing all sent/received messages and connection events
+- [x] **OVRS-02**: Activity feed is filterable by connection, time range, and message type
+- [x] **OVRS-03**: Human can intervene in any conversation -- take over and send messages directly
+- [x] **OVRS-04**: Messages are attributed as agent-sent or human-sent for conversation clarity
+- [x] **OVRS-05**: Tamper-evident audit log with hash chaining records all messages and connection events
+- [x] **OVRS-06**: Audit log entries include: timestamp, actor pubkey, action type, connection ID, message hash
 
 ### Skill Integration
 
@@ -133,7 +133,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | RELY-04 | Phase 3 | Complete |
 | RELY-05 | Phase 4 | Complete |
 | RELY-06 | Phase 4 | Complete |
-| RELY-07 | Phase 6 | Pending |
+| RELY-07 | Phase 6 | Complete |
 | RELY-08 | Phase 1 | Complete |
 | CRYP-01 | Phase 3 | Complete |
 | CRYP-02 | Phase 1 | Complete |
@@ -144,7 +144,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | CONN-02 | Phase 2 | Complete |
 | CONN-03 | Phase 2 | Complete |
 | CONN-04 | Phase 2 | Complete |
-| CONN-05 | Phase 6 | Pending |
+| CONN-05 | Phase 7 | Complete |
 | CONN-06 | Phase 2 | Complete |
 | AUTO-01 | Phase 2 | Complete |
 | AUTO-02 | Phase 2 | Complete |
@@ -156,12 +156,12 @@ Which phases cover which requirements. Updated during roadmap creation.
 | AUTO-08 | Phase 5 | Complete |
 | AUTO-09 | Phase 5 | Complete |
 | AUTO-10 | Phase 5 | Complete |
-| OVRS-01 | Phase 6 | Pending |
-| OVRS-02 | Phase 6 | Pending |
-| OVRS-03 | Phase 6 | Pending |
-| OVRS-04 | Phase 6 | Pending |
-| OVRS-05 | Phase 6 | Pending |
-| OVRS-06 | Phase 6 | Pending |
+| OVRS-01 | Phase 7 | Complete |
+| OVRS-02 | Phase 7 | Complete |
+| OVRS-03 | Phase 7 | Complete |
+| OVRS-04 | Phase 7 | Complete |
+| OVRS-05 | Phase 7 | Complete |
+| OVRS-06 | Phase 6 | Complete |
 | SKIL-01 | Phase 3 | Complete |
 | SKIL-02 | Phase 3 | Complete |
 | SKIL-03 | Phase 3 | Complete |
@@ -174,4 +174,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-02-26*
-*Last updated: 2026-02-26 after roadmap creation*
+*Last updated: 2026-02-27 after gap closure phase creation*

@@ -14,11 +14,11 @@ metadata:
 
 # Pinch
 
-Secure agent-to-agent encrypted messaging. Pinch enables agents to exchange end-to-end encrypted messages through a relay server that never sees plaintext content. All connections require explicit human approval before any messages can flow.
+Secure agent-to-agent encrypted messaging with human oversight. Pinch enables agents to exchange end-to-end encrypted messages through a relay server that never sees plaintext content. All connections require explicit human approval before any messages can flow. A unified activity feed provides tamper-evident audit logging, and human intervention tools allow the operator to take over, mute, or verify the integrity of all agent communications.
 
 ## Overview
 
-Pinch provides five tools for encrypted messaging between agents. Messages are encrypted client-side using NaCl box (X25519 + XSalsa20-Poly1305), relayed through a WebSocket server, and decrypted only by the intended recipient. The relay sees only opaque ciphertext envelopes. Every connection starts with human approval, ensuring oversight at every step.
+Pinch provides ten tools for encrypted messaging between agents with full human oversight. Messages are encrypted client-side using NaCl box (X25519 + XSalsa20-Poly1305), relayed through a WebSocket server, and decrypted only by the intended recipient. The relay sees only opaque ciphertext envelopes. Every connection starts with human approval, ensuring oversight at every step. All events are recorded in a SHA-256 hash-chained activity feed for tamper-evident auditing.
 
 ## Setup
 
@@ -155,6 +155,7 @@ pinch-history --connection "pinch:abc123@relay.example.com" --limit 10
     "priority": "normal",
     "sequence": 1,
     "state": "read_by_agent",
+    "attribution": "agent",
     "createdAt": "2026-02-27T04:00:00.000Z",
     "updatedAt": "2026-02-27T04:00:00.000Z"
   }
@@ -192,6 +193,125 @@ pinch-status --id "019503a1-2b3c-7d4e-8f5a-1234567890ab"
 
 ```json
 { "error": "message not found" }
+```
+
+### pinch_activity
+
+Query the unified activity feed for events across all connections or filtered by specific criteria.
+
+**Parameters:**
+
+| Parameter | Required | Description |
+|---|---|---|
+| `--connection` | No | Filter by specific connection address |
+| `--type` | No | Filter by event type (message_sent, connection_approve, autonomy_change, etc.) |
+| `--since` | No | Events after this ISO timestamp |
+| `--until` | No | Events before this ISO timestamp |
+| `--limit` | No | Maximum events to return (default: 50) |
+| `--include-muted` | No | Include muted events (excluded by default) |
+
+**Example:**
+
+```bash
+pinch-activity --connection "pinch:abc123@relay.example.com" --limit 20
+```
+
+**Output:**
+
+```json
+{ "events": [...], "count": 20 }
+```
+
+### pinch_intervene
+
+Enter or exit human passthrough mode for a connection, or send a human-attributed message.
+
+**Parameters:**
+
+| Parameter | Required | Description |
+|---|---|---|
+| `--start --connection` | Conditional | Enter passthrough mode (human takes over) |
+| `--stop --connection` | Conditional | Exit passthrough mode (hand back to agent) |
+| `--send --connection --body` | Conditional | Send a message attributed to the human |
+
+**Example:**
+
+```bash
+pinch-intervene --start --connection "pinch:abc123@relay.example.com"
+pinch-intervene --send --connection "pinch:abc123@relay.example.com" --body "This is the human speaking"
+pinch-intervene --stop --connection "pinch:abc123@relay.example.com"
+```
+
+### pinch_mute
+
+Silently mute or unmute a connection. Muted connections still receive messages (delivery confirmations sent) but content is not surfaced to the agent or human.
+
+**Parameters:**
+
+| Parameter | Required | Description |
+|---|---|---|
+| `--connection` | Yes | Connection address to mute |
+| `--unmute` | No | Unmute instead of mute |
+
+**Example:**
+
+```bash
+pinch-mute --connection "pinch:abc123@relay.example.com"
+pinch-mute --unmute --connection "pinch:abc123@relay.example.com"
+```
+
+### pinch_audit_verify
+
+Verify the integrity of the tamper-evident audit log hash chain.
+
+**Parameters:**
+
+| Parameter | Required | Description |
+|---|---|---|
+| `--tail` | No | Only verify the most recent N entries (default: all) |
+
+**Example:**
+
+```bash
+pinch-audit-verify
+pinch-audit-verify --tail 100
+```
+
+**Output (valid):**
+
+```json
+{ "valid": true, "total_entries": 1234, "verified_entries": 1234, "genesis_id": "...", "latest_id": "..." }
+```
+
+**Output (broken chain):**
+
+```json
+{ "valid": false, "total_entries": 1234, "first_broken_at": "entry-id", "broken_index": 42, "expected_hash": "...", "actual_hash": "..." }
+```
+
+### pinch_audit_export
+
+Export the audit log to a JSON file for independent verification.
+
+**Parameters:**
+
+| Parameter | Required | Description |
+|---|---|---|
+| `--output` | Yes | Output file path |
+| `--since` | No | Export entries after this ISO timestamp |
+| `--until` | No | Export entries before this ISO timestamp |
+
+**Example:**
+
+```bash
+pinch-audit-export --output /tmp/audit.json
+pinch-audit-export --since "2026-01-01T00:00:00Z" --output /tmp/audit-january.json
+```
+
+**Output:**
+
+```json
+{ "exported": 1234, "path": "/tmp/audit.json" }
 ```
 
 ## Connection Lifecycle

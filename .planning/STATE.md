@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-26)
 
 **Core value:** Agents can securely message each other with human consent and oversight at every step -- no message flows without explicit human approval of the connection.
-**Current focus:** Phase 5 complete. Full autonomy system with circuit breakers and enforcement pipeline.
+**Current focus:** Phase 9 complete. Skill documentation and CLI optimization -- relay-free local bootstrap for CLI tools.
 
 ## Current Position
 
-Phase: 5 of 6 (Full Autonomy and Permissions) -- COMPLETE
-Plan: 3 of 3 in current phase (complete)
-Status: Phase Complete
-Last activity: 2026-02-27 -- Completed 05-03-PLAN.md
+Phase: 9 of 9 (Skill Documentation and CLI Optimization)
+Plan: 1 of 1 in current phase (complete)
+Status: Complete
+Last activity: 2026-02-27 -- Completed 09-01-PLAN.md
 
-Progress: [████████████████████] 100%
+Progress: [█████████████████████████] 100%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 16
+- Total plans completed: 23
 - Average duration: 6min
-- Total execution time: 1.7 hours
+- Total execution time: 2.3 hours
 
 **By Phase:**
 
@@ -32,9 +32,13 @@ Progress: [████████████████████] 100%
 | 03 | 4 | 23min | 6min |
 | 04 | 2 | 15min | 8min |
 | 05 | 3 | 15min | 5min |
+| 06 | 4 | 23min | 6min |
+| 07 | 1 | 3min | 3min |
+| 08 | 1 | 2min | 2min |
+| 09 | 1 | 2min | 2min |
 
 **Recent Trend:**
-- Last 5 plans: 04-02 (10min), 05-01 (6min), 05-02 (4min), 05-03 (5min)
+- Last 5 plans: 06-03 (12min), 07-01 (3min), 08-01 (2min), 09-01 (2min)
 - Trend: stable
 
 *Updated after each plan completion*
@@ -51,6 +55,13 @@ Progress: [████████████████████] 100%
 | Phase 05 P01 | 6min | 2 tasks | 12 files |
 | Phase 05 P02 | 4min | 2 tasks | 11 files |
 | Phase 05 P03 | 5min | 2 tasks | 11 files |
+| Phase 06 P01 | 4min | 2 tasks | 5 files |
+| Phase 06 P02 | 4min | 2 tasks | 10 files |
+| Phase 06 P04 | 3min | 2 tasks | 6 files |
+| Phase 06 P03 | 12min | 2 tasks | 9 files |
+| Phase 07 P01 | 3min | 2 tasks | 5 files |
+| Phase 08 P01 | 2min | 2 tasks | 3 files |
+| Phase 09 P01 | 2min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -118,6 +129,28 @@ Recent decisions affecting current work:
 - [05-03]: Circuit breaker uses updateConnection() for downgrade to avoid setAutonomy() confirmation gate
 - [05-03]: Auto-respond policy evaluation logs every decision to activity feed regardless of outcome
 - [05-03]: Circuit breaker trip calls connectionStore.save() as fire-and-forget for persistence
+- [06-01]: actionType defaults to eventType when not explicitly provided (backward compat)
+- [06-01]: Genesis entry has prevHash="" -- old entries without hashes are pre-audit
+- [06-01]: Muted events excluded by default in pinch_activity; --include-muted overrides for audit
+- [06-01]: computeEntryHash exported for reuse by audit verification tool in later plans
+- [06-02]: Token bucket via golang.org/x/time/rate (stdlib-quality, minimal dependency)
+- [06-02]: Rate limit check BEFORE envelope size check for fastest rejection path
+- [06-02]: Lazy limiter creation per address (memory proportional to active clients)
+- [06-02]: TypeScript handler logs only (no backoff in v1 -- rate limits for obvious abuse)
+- [06-03]: Mute check runs before passthrough check, which runs before permissions check (Step 0, 0b, then 1)
+- [06-03]: Muted + passthrough: mute takes precedence since mute check is first in pipeline
+- [06-03]: clearPassthroughFlags() is async and calls save() to persist cleared state to disk
+- [06-03]: Structured content uses application/x-pinch+json content type as forward-compatible signal
+- [06-04]: No changes to cli.ts bootstrap -- ActivityFeed evolves in-place via initSchema()
+- [06-04]: Tail verification skips genesis prev_hash check (partial chain starts at arbitrary point)
+- [06-04]: Export uses raw SQL column names (snake_case) in JSON for independent verification
+- [07-01]: Attribution column is nullable TEXT (not NOT NULL) for backward compatibility with existing messages
+- [07-01]: Outbound attribution defaults to "agent" when not specified, consistent with wire format behavior
+- [07-01]: pinch-history surfaces attribution as null for old messages without attribution
+- [08-01]: PINCH_RELAY_DEV=1 gates InsecureSkipVerify (production defaults to secure)
+- [08-01]: Dead flush key code removed entirely (superseded by Phase 4 immediate-deletion strategy)
+- [09-01]: Separate localBootstrapped singleton (not reusing bootstrapped) to avoid interference between local and full bootstrap
+- [09-01]: bootstrapLocal() placed after shutdown() for logical file organization (full bootstrap section, then local bootstrap section)
 
 ### Pending Todos
 
@@ -130,5 +163,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-27
-Stopped at: Completed 05-03-PLAN.md (Phase 5 complete)
+Stopped at: Completed 09-01-PLAN.md
 Resume file: None

@@ -17,7 +17,7 @@
  *               { "error": "..." } for errors
  */
 
-import { bootstrap, shutdown } from "./cli.js";
+import { bootstrapLocal, shutdownLocal } from "./cli.js";
 import type {
 	CalendarPermission,
 	FilePermission,
@@ -173,14 +173,14 @@ export function parseArgs(args: string[]): ParsedArgs {
 /** Execute the pinch_permissions tool. */
 export async function run(args: string[]): Promise<void> {
 	const parsed = parseArgs(args);
-	const { connectionStore } = await bootstrap();
+	const { connectionStore } = await bootstrapLocal();
 
 	const connection = connectionStore.getConnection(parsed.address);
 	if (!connection) {
 		console.log(
 			JSON.stringify({ error: `Connection not found: ${parsed.address}` }),
 		);
-		await shutdown();
+		await shutdownLocal();
 		return;
 	}
 
@@ -194,7 +194,7 @@ export async function run(args: string[]): Promise<void> {
 				permissions: manifest,
 			}),
 		);
-		await shutdown();
+		await shutdownLocal();
 		return;
 	}
 
@@ -267,7 +267,7 @@ export async function run(args: string[]): Promise<void> {
 		console.log(JSON.stringify({ error: msg }));
 	}
 
-	await shutdown();
+	await shutdownLocal();
 }
 
 // Self-executable entry point.

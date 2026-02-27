@@ -15,9 +15,12 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 1: Foundation and Crypto Primitives** - Monorepo scaffold, protobuf wire format, Ed25519 identity, relay WebSocket skeleton, cross-language crypto tests (completed 2026-02-27)
 - [x] **Phase 2: Authentication and Connection** - Challenge-response auth, connection request lifecycle, blocking, baseline autonomy (Full Manual + Full Auto) (completed 2026-02-27)
 - [x] **Phase 3: Encrypted 1:1 Messaging** - NaCl box E2E encryption, real-time message delivery, OpenClaw skill integration (completed 2026-02-27)
-- [ ] **Phase 4: Store-and-Forward** - bbolt message queue at relay, TTL expiration, reconnect flush, delivery confirmations
+- [x] **Phase 4: Store-and-Forward** - bbolt message queue at relay, TTL expiration, reconnect flush, delivery confirmations (completed 2026-02-27)
 - [x] **Phase 5: Full Autonomy and Permissions** - 4-tier autonomy state machine, inbound permissions manifest, autonomy change controls (completed 2026-02-27)
-- [ ] **Phase 6: Oversight and Safety** - Activity feed, human intervention, audit log with hash chaining, rate limiting, circuit breakers, muting
+- [x] **Phase 6: Oversight and Safety** - Activity feed, human intervention, audit log with hash chaining, rate limiting, circuit breakers, muting (completed 2026-02-27)
+- [x] **Phase 7: Wire Phase 6 CLI Tools and Persist Attribution** - Add missing bin entries to package.json, persist inbound attribution to SQLite schema (completed 2026-02-27)
+- [x] **Phase 8: Relay Hardening and Dead Code Removal** - Remove TrackFlushKey/PopFlushKey dead code, lock down InsecureSkipVerify for production (completed 2026-02-27)
+- [x] **Phase 9: Skill Documentation and CLI Optimization** - Fix SKILL.md permission tier names, refactor CLI tools to skip unnecessary relay WebSocket (completed 2026-02-27)
 
 ## Phase Details
 
@@ -112,11 +115,54 @@ Plans:
   3. Tamper-evident audit log with hash chaining records all messages and connection events with timestamp, actor pubkey, action type, connection ID, and message hash
   4. Relay enforces per-connection rate limiting (token bucket or sliding window); excessive requests are rejected
   5. Agent can mute a connection -- messages still delivered but not surfaced to agent or human
-**Plans**: TBD
+**Plans**: 4 plans
 
 Plans:
-- [ ] 06-01: TBD
-- [ ] 06-02: TBD
+- [ ] 06-01-PLAN.md -- Evolve ActivityFeed to unified event log with SHA-256 hash chaining and pinch_activity tool
+- [ ] 06-02-PLAN.md -- Relay-side per-connection rate limiting (Go token bucket) with RateLimited proto message
+- [ ] 06-03-PLAN.md -- Human intervention (passthrough mode), message attribution, connection muting
+- [ ] 06-04-PLAN.md -- Audit verify/export tools, SKILL.md and HEARTBEAT.md updates
+
+### Phase 7: Wire Phase 6 CLI Tools and Persist Attribution
+**Goal:** Close all remaining v1.0 audit gaps — make Phase 6 CLI tools invocable via package.json bin entries and persist inbound message attribution to SQLite
+**Depends on:** Phase 6
+**Requirements:** OVRS-01, OVRS-02, OVRS-03, OVRS-04, OVRS-05, CONN-05
+**Gap Closure:** Closes gaps from audit
+**Success Criteria** (what must be TRUE):
+  1. All 5 Phase 6 CLI tools (pinch-activity, pinch-intervene, pinch-mute, pinch-audit-verify, pinch-audit-export) appear in skill/package.json bin field and are invocable after `pnpm install`
+  2. Messages SQLite schema has an `attribution` column; `MessageRecord` interface includes an `attribution` field; `handleIncomingMessage()` persists inbound attribution from the `application/x-pinch+json` wrapper
+  3. `pinch-history` can surface attribution data for messages that were sent with human intervention
+
+**Plans**: 1 plan
+
+Plans:
+- [ ] 07-01-PLAN.md -- Add 5 Phase 6 bin entries to package.json, persist message attribution to SQLite, surface in pinch-history
+
+### Phase 8: Relay Hardening and Dead Code Removal
+**Goal:** Remove dead code paths and lock down development-only settings in the Go relay for production readiness
+**Depends on:** Phase 4
+**Requirements:** RELY-06 (cleanup)
+**Gap Closure:** Closes RELY-06 integration gap and Phase 1/4 tech debt from audit
+**Success Criteria** (what must be TRUE):
+  1. `TrackFlushKey` and `PopFlushKey` methods are removed from `relay/internal/hub/client.go` and `relay/internal/hub/hub.go`; all references eliminated; relay compiles and passes tests
+  2. `InsecureSkipVerify: true` is removed or gated behind an explicit development flag in `relay/cmd/pinchd/main.go`; production default is secure
+**Plans**: 1 plan
+
+Plans:
+- [ ] 08-01-PLAN.md -- Remove dead flush key code and gate InsecureSkipVerify behind PINCH_RELAY_DEV env var
+
+### Phase 9: Skill Documentation and CLI Optimization
+**Goal:** Fix documentation inaccuracies and eliminate unnecessary relay connections in local-only CLI tools
+**Depends on:** Phase 6
+**Requirements:** (cleanup — no requirement status changes)
+**Gap Closure:** Closes Phase 5/6 tech debt from audit
+**Success Criteria** (what must be TRUE):
+  1. SKILL.md lines 259-278 use correct permission tier names (`full_details`/`propose_and_book`/`specific_folders`/`everything`/`scoped`/`full`) instead of incorrect `read`/`read_write`/`execute`
+  2. `pinch-permissions`, `pinch-audit-verify`, and `pinch-audit-export` CLI tools operate on local SQLite without opening a relay WebSocket connection
+**Plans**: 1 plan
+
+Plans:
+- [ ] 09-01-PLAN.md -- Add bootstrapLocal() for relay-free CLI operation, update three local-only tools
 
 ## Progress
 
@@ -130,4 +176,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 | 3. Encrypted 1:1 Messaging | 1/4 | Complete    | 2026-02-27 |
 | 4. Store-and-Forward | 2/2 | Complete    | 2026-02-27 |
 | 5. Full Autonomy and Permissions | 0/3 | Complete    | 2026-02-27 |
-| 6. Oversight and Safety | 0/2 | Not started | - |
+| 6. Oversight and Safety | 0/4 | Complete    | 2026-02-27 |
+| 7. Wire Phase 6 CLI Tools and Persist Attribution | 0/1 | Complete    | 2026-02-27 |
+| 8. Relay Hardening and Dead Code Removal | 0/0 | Complete    | 2026-02-27 |
+| 9. Skill Documentation and CLI Optimization | 0/1 | Complete    | 2026-02-27 |

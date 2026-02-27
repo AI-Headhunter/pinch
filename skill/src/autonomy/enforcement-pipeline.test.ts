@@ -355,6 +355,115 @@ describe("EnforcementPipeline", () => {
 		expect(result.state).toBe("escalated_to_human");
 	});
 
+	it("muted connection: message returns state 'delivered', activity feed records muted event, permissions not invoked", async () => {
+		connectionStore.addConnection({
+			peerAddress: addr,
+			peerPublicKey: "",
+			state: "active",
+			nickname: "Bob",
+			autonomyLevel: "notify",
+			muted: true,
+		});
+
+		let permissionsChecked = false;
+		const trackingEnforcer = createMockEnforcer();
+		const originalCheck = trackingEnforcer.check;
+		trackingEnforcer.check = async (...args: Parameters<typeof originalCheck>) => {
+			permissionsChecked = true;
+			return originalCheck(...args);
+		};
+
+		const pipeline = makePipeline(trackingEnforcer);
+		const msg = createTestMessage(messageStore, {
+			connectionAddress: addr,
+		});
+
+		const result = await pipeline.process(msg, addr);
+
+		expect(result.state).toBe("delivered");
+		expect(result.messageId).toBe(msg.id);
+		expect(permissionsChecked).toBe(false);
+
+		const events = activityFeed.getEvents({
+			eventType: "message_received_muted",
+		});
+		expect(events).toHaveLength(1);
+		expect(events[0].badge).toBe("muted");
+	});
+
+	it("passthrough connection: message returns state 'escalated_to_human', activity feed records intervention event", async () => {
+		connectionStore.addConnection({
+			peerAddress: addr,
+			peerPublicKey: "",
+			state: "active",
+			nickname: "Bob",
+			autonomyLevel: "notify",
+			passthrough: true,
+		});
+
+		const pipeline = makePipeline();
+		const msg = createTestMessage(messageStore, {
+			connectionAddress: addr,
+		});
+
+		const result = await pipeline.process(msg, addr);
+
+		expect(result.state).toBe("escalated_to_human");
+		expect(result.messageId).toBe(msg.id);
+
+		const events = activityFeed.getEvents({
+			eventType: "message_during_intervention",
+		});
+		expect(events).toHaveLength(1);
+		expect(events[0].badge).toBe("intervention");
+	});
+
+	it("muted + passthrough: mute takes precedence (mute check is first)", async () => {
+		connectionStore.addConnection({
+			peerAddress: addr,
+			peerPublicKey: "",
+			state: "active",
+			nickname: "Bob",
+			autonomyLevel: "notify",
+			muted: true,
+			passthrough: true,
+		});
+
+		const pipeline = makePipeline();
+		const msg = createTestMessage(messageStore, {
+			connectionAddress: addr,
+		});
+
+		const result = await pipeline.process(msg, addr);
+
+		// Mute check comes before passthrough, so muted wins
+		expect(result.state).toBe("delivered");
+	});
+
+	it("clearPassthroughFlags clears passthrough on all connections", async () => {
+		connectionStore.addConnection({
+			peerAddress: "pinch:alice@localhost",
+			peerPublicKey: "",
+			state: "active",
+			nickname: "Alice",
+			autonomyLevel: "full_manual",
+			passthrough: true,
+		});
+		connectionStore.addConnection({
+			peerAddress: addr,
+			peerPublicKey: "",
+			state: "active",
+			nickname: "Bob",
+			autonomyLevel: "full_manual",
+			passthrough: true,
+		});
+
+		await connectionStore.clearPassthroughFlags();
+
+		expect(connectionStore.getConnection("pinch:alice@localhost")!.passthrough).toBe(false);
+		expect(connectionStore.getConnection(addr)!.passthrough).toBe(false);
+	});
+
 	it("auto_respond evaluation records activity feed entry with auto_respond_decision details", async () => {
 		connectionStore.addConnection({
 			peerAddress: addr,

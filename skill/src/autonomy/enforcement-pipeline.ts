@@ -47,6 +47,51 @@ export class EnforcementPipeline {
 		message: MessageRecord,
 		connectionAddress: string,
 	): Promise<RoutedMessage> {
+		// Step 0: Mute check (before everything else -- per pitfall 5, muted
+		// messages should skip the entire enforcement pipeline to avoid
+		// triggering circuit breakers)
+		const connection = this.connectionStore.getConnection(connectionAddress);
+		if (connection?.muted) {
+			this.activityFeed.record({
+				connectionAddress,
+				eventType: "message_received_muted",
+				messageId: message.id,
+				actionType: "message_receive_muted",
+				badge: "muted",
+			});
+			this.messageStore.updateState(message.id, "delivered");
+			return {
+				messageId: message.id,
+				senderAddress: connectionAddress,
+				body: message.body,
+				threadId: message.threadId,
+				replyTo: message.replyTo,
+				priority: message.priority,
+				state: "delivered",
+			};
+		}
+
+		// Step 0b: Passthrough check (human intervention mode)
+		if (connection?.passthrough) {
+			this.messageStore.updateState(message.id, "escalated_to_human");
+			this.activityFeed.record({
+				connectionAddress,
+				eventType: "message_during_intervention",
+				messageId: message.id,
+				actionType: "message_receive_intervention",
+				badge: "intervention",
+			});
+			return {
+				messageId: message.id,
+				senderAddress: connectionAddress,
+				body: message.body,
+				threadId: message.threadId,
+				replyTo: message.replyTo,
+				priority: message.priority,
+				state: "escalated_to_human",
+			};
+		}
+
 		// Step 1: Permissions check
 		const enforcement = await this.permissionsEnforcer.check(
 			message.body,

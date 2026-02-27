@@ -49,6 +49,10 @@ export interface Connection {
 	circuitBreakerTripped?: boolean;
 	/** Permissions manifest for domain-specific capability tiers. */
 	permissionsManifest?: PermissionsManifest;
+	/** Whether the connection is muted. Muted messages are delivered (confirmations sent) but not surfaced. */
+	muted?: boolean;
+	/** Whether the human is in passthrough mode for this connection. */
+	passthrough?: boolean;
 	/** Free-text message from connection request (max 280 chars). */
 	shortMessage?: string;
 	/** ISO timestamp when connection was created. */
@@ -189,6 +193,8 @@ export class ConnectionStore {
 				| "autoRespondPolicy"
 				| "circuitBreakerTripped"
 				| "permissionsManifest"
+				| "muted"
+				| "passthrough"
 			>
 		>,
 	): Connection {
@@ -318,5 +324,18 @@ export class ConnectionStore {
 		}
 
 		return expired;
+	}
+
+	/**
+	 * Clear all passthrough flags. Called on bootstrap to prevent stuck
+	 * passthrough after disconnect.
+	 */
+	async clearPassthroughFlags(): Promise<void> {
+		for (const conn of Object.values(this.data.connections)) {
+			if (conn.passthrough) {
+				conn.passthrough = false;
+			}
+		}
+		await this.save();
 	}
 }
