@@ -1,7 +1,9 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { type ChildProcess, spawn } from "node:child_process";
-import { dirname, resolve } from "node:path";
+import { dirname, resolve, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { mkdtemp, rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
 import { RelayClient } from "./relay-client.js";
 import { generateKeypair } from "./identity.js";
 import type { Keypair } from "./identity.js";
@@ -15,6 +17,7 @@ const RELAY_HOST = "localhost";
 const HEALTH_URL = `http://127.0.0.1:${RELAY_PORT}/health`;
 
 let relayProcess: ChildProcess;
+let tempDbDir: string;
 
 /** Fetch the health endpoint and return parsed JSON. */
 async function getHealth(): Promise<{
@@ -26,7 +29,7 @@ async function getHealth(): Promise<{
 }
 
 /** Wait for the relay to be ready by polling the health endpoint. */
-async function waitForRelay(timeoutMs = 15000): Promise<void> {
+async function waitForRelay(timeoutMs = 25000): Promise<void> {
 	const deadline = Date.now() + timeoutMs;
 	while (Date.now() < deadline) {
 		try {
@@ -61,12 +64,18 @@ async function waitForConnections(
 }
 
 beforeAll(async () => {
+	// Use a unique temp directory for the bbolt database to avoid file lock
+	// conflicts between test runs.
+	tempDbDir = await mkdtemp(join(tmpdir(), "pinch-relay-test-"));
+	const dbPath = join(tempDbDir, "blocks.db");
+
 	// Spawn the Go relay as a child process.
 	relayProcess = spawn("go", ["run", "./relay/cmd/pinchd/"], {
 		env: {
 			...process.env,
 			PINCH_RELAY_PORT: String(RELAY_PORT),
 			PINCH_RELAY_HOST: RELAY_HOST,
+			PINCH_RELAY_DB: dbPath,
 		},
 		cwd: PROJECT_ROOT,
 		stdio: ["ignore", "pipe", "pipe"],
@@ -79,9 +88,13 @@ beforeAll(async () => {
 	await waitForRelay();
 }, 30000);
 
-afterAll(() => {
+afterAll(async () => {
 	if (relayProcess) {
 		relayProcess.kill("SIGTERM");
+	}
+	// Clean up temp db directory.
+	if (tempDbDir) {
+		await rm(tempDbDir, { recursive: true, force: true }).catch(() => {});
 	}
 });
 
