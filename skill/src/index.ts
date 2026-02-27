@@ -24,5 +24,9 @@ export type { SendMessageParams } from "./message-manager.js";
 export { InboundRouter } from "./inbound-router.js";
 export type { RoutedMessage } from "./inbound-router.js";
 
+// Autonomy
+export { ActivityFeed } from "./autonomy/activity-feed.js";
+export type { ActivityEvent } from "./autonomy/activity-feed.js";
+
 // Delivery
 export { signDeliveryConfirmation, verifyDeliveryConfirmation } from "./delivery.js";

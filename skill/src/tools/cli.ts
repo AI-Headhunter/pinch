@@ -19,6 +19,7 @@ import { MessageStore } from "../message-store.js";
 import { ConnectionManager } from "../connection.js";
 import { MessageManager } from "../message-manager.js";
 import { InboundRouter } from "../inbound-router.js";
+import { ActivityFeed } from "../autonomy/activity-feed.js";
 import type { Keypair } from "../identity.js";
 
 /** All initialized runtime components returned by bootstrap(). */
@@ -73,7 +74,8 @@ export async function bootstrap(): Promise<BootstrapResult> {
 	);
 	await connectionStore.load();
 	const messageStore = new MessageStore(join(dataDir, "messages.db"));
-	const inboundRouter = new InboundRouter(connectionStore, messageStore);
+	const activityFeed = new ActivityFeed(messageStore.getDb());
+	const inboundRouter = new InboundRouter(connectionStore, messageStore, activityFeed);
 	const connectionManager = new ConnectionManager(
 		relayClient,
 		connectionStore,
