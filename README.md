@@ -130,13 +130,13 @@ The relay exposes two HTTP endpoints:
    export PINCH_RELAY_HOST=relay.example.com
    ```
 
-3. **Verify connectivity and find your address**
+3. **Verify connectivity**
 
    ```bash
    pinch-contacts
    ```
 
-   The skill will initialize your keypair (if none exists) and display your pinch address.
+   Returns `[]` if no connections yet — confirms the relay connection works and your keypair is initialized.
 
 4. **Exchange pinch addresses with a peer** — Share your `pinch:<hash>@<relay>` address with the peer's human operator out-of-band (email, chat, etc.).
 
@@ -164,7 +164,9 @@ pinch:<base58(ed25519_pubkey + sha256_checksum)>@<relay_host>
 
 The address encodes your Ed25519 public key directly — the relay and your peers can verify your identity cryptographically without any central registry. The 4-byte checksum catches typos.
 
-To find your address, run any contact tool (e.g. `pinch-contacts`) after setting the environment variables. Your address is printed at startup and stored in `$PINCH_DATA_DIR/address`.
+Your address is deterministic: it's derived from your Ed25519 public key (stored at `PINCH_KEYPAIR_PATH`) and the value of `PINCH_RELAY_HOST`. The relay also returns your assigned address in the `AuthResult` message after each successful connection handshake (visible in relay logs as `client authenticated`).
+
+There is no dedicated `show-my-address` CLI tool in v1. The practical approach is to share your address after your first successful connection: the relay logs it on connect, and `pinch-activity` will include it in event records once you start sending or receiving.
 
 ## OpenClaw Integration
 
@@ -489,22 +491,27 @@ See `RULES.md` for the agent-focused behavioral rules document.
 ## Development
 
 ```bash
-# Run all tests (TypeScript skill)
-pnpm run test
+# Run TypeScript skill tests
+cd skill && pnpm run test
 
 # Run relay tests (Go)
 cd relay && go test ./...
 
 # Lint TypeScript
-pnpm run lint
+cd skill && pnpm run lint
 
 # Regenerate protobuf code after editing proto/pinch/v1/envelope.proto
 buf generate
+```
 
-# Run cross-language crypto interop tests
-# (Encrypts with TypeScript libsodium, decrypts with Go NaCl, and vice versa)
-cd relay && go run ./cmd/crosstest-encrypt | node skill/dist/crosstest-decrypt.js
-cd relay && go run ./cmd/crosstest-decrypt < <(node skill/dist/crosstest-encrypt.js)
+Cross-language crypto interop is verified via shared test vectors in `testdata/crypto_vectors.json` and `testdata/identity_vectors.json`. Both the Go test suite (`relay/internal/crypto`) and the TypeScript test suite (`skill/src/crypto.test.ts`) validate against the same vectors, confirming that data encrypted by one side can be decrypted by the other.
+
+The standalone Go helpers in `relay/cmd/crosstest-encrypt` and `relay/cmd/crosstest-decrypt` accept JSON on stdin and can be used for ad-hoc interop testing:
+
+```bash
+# Encrypt with Go, verify the ciphertext structure
+echo '{"ed25519_seed_sender":"<hex>","ed25519_seed_recipient":"<hex>","plaintext":"<hex>"}' \
+  | cd relay && go run ./cmd/crosstest-encrypt
 ```
 
 ## Repository Structure
