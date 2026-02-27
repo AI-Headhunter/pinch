@@ -346,6 +346,9 @@ export class MessageManager {
 				case MessageType.QUEUE_FULL:
 					this.handleQueueFull(envelope);
 					break;
+				case MessageType.RATE_LIMITED:
+					this.handleRateLimited(envelope);
+					break;
 			}
 		});
 	}
@@ -358,6 +361,18 @@ export class MessageManager {
 		if (envelope.payload.case !== "queueStatus") return;
 		const pendingCount = envelope.payload.value.pendingCount;
 		console.log(`Relay reports ${pendingCount} queued messages pending flush`);
+	}
+
+	/**
+	 * Handle a RateLimited envelope from the relay indicating the sender
+	 * has exceeded the per-connection rate limit.
+	 */
+	private handleRateLimited(envelope: Envelope): void {
+		if (envelope.payload.case !== "rateLimited") return;
+		const { retryAfterMs, reason } = envelope.payload.value;
+		console.warn(
+			`Rate limited by relay: ${reason}. Retry after ${retryAfterMs}ms`,
+		);
 	}
 
 	/**
