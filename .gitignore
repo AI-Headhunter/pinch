@@ -19,3 +19,7 @@ Thumbs.db
 
 # Go
 /relay/pinchd
+/pinchd
+
+# Build artifacts
+.build/

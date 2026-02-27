@@ -15,7 +15,7 @@ jobs:
 
       - uses: actions/setup-go@v5
         with:
-          go-version: "1.22"
+          go-version: "1.24"
 
       - name: Build relay
         run: go build ./...
@@ -52,3 +52,28 @@ jobs:
 
       - name: Test skill
         run: pnpm -C skill test
+
+  cross-language:
+    name: Cross-Language Crypto
+    needs: [go, typescript]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.24"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Run cross-language crypto tests
+        run: bash tests/cross-language/run.sh
