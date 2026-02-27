@@ -131,7 +131,10 @@ Plans:
   2. Messages SQLite schema has an `attribution` column; `MessageRecord` interface includes an `attribution` field; `handleIncomingMessage()` persists inbound attribution from the `application/x-pinch+json` wrapper
   3. `pinch-history` can surface attribution data for messages that were sent with human intervention
 
-Plans: TBD
+**Plans**: 1 plan
+
+Plans:
+- [ ] 07-01-PLAN.md -- Add 5 Phase 6 bin entries to package.json, persist message attribution to SQLite, surface in pinch-history
 
 ## Progress
 
@@ -146,4 +149,4 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 | 4. Store-and-Forward | 2/2 | Complete    | 2026-02-27 |
 | 5. Full Autonomy and Permissions | 0/3 | Complete    | 2026-02-27 |
 | 6. Oversight and Safety | 0/4 | Complete    | 2026-02-27 |
-| 7. Wire Phase 6 CLI Tools and Persist Attribution | 0/0 | Not Started | — |
+| 7. Wire Phase 6 CLI Tools and Persist Attribution | 0/1 | Planned | — |
