@@ -12,7 +12,7 @@
  */
 
 import { writeFile } from "node:fs/promises";
-import { bootstrap, shutdown } from "./cli.js";
+import { bootstrapLocal, shutdownLocal } from "./cli.js";
 
 /** Parsed CLI arguments for pinch-audit-export. */
 export interface AuditExportArgs {
@@ -54,7 +54,7 @@ export function parseArgs(args: string[]): AuditExportArgs {
 /** Execute the pinch_audit_export tool. */
 export async function run(args: string[]): Promise<void> {
 	const parsed = parseArgs(args);
-	const { messageStore } = await bootstrap();
+	const { messageStore } = await bootstrapLocal();
 	const db = messageStore.getDb();
 
 	// Build query with optional time range filters.
@@ -114,7 +114,7 @@ export async function run(args: string[]): Promise<void> {
 	console.log(
 		JSON.stringify({ exported: entries.length, path: parsed.output }),
 	);
-	await shutdown();
+	await shutdownLocal();
 }
 
 // Self-executable entry point.

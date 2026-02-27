@@ -12,7 +12,7 @@
  *   On failure: { valid: false, total_entries, first_broken_at, broken_index, expected_hash, actual_hash }
  */
 
-import { bootstrap, shutdown } from "./cli.js";
+import { bootstrapLocal, shutdownLocal } from "./cli.js";
 import { computeEntryHash } from "../autonomy/activity-feed.js";
 
 /** Parsed CLI arguments for pinch-audit-verify. */
@@ -47,7 +47,7 @@ export function parseArgs(args: string[]): AuditVerifyArgs {
 /** Execute the pinch_audit_verify tool. */
 export async function run(args: string[]): Promise<void> {
 	const parsed = parseArgs(args);
-	const { messageStore } = await bootstrap();
+	const { messageStore } = await bootstrapLocal();
 	const db = messageStore.getDb();
 
 	// Count total hash-chained entries.
@@ -68,7 +68,7 @@ export async function run(args: string[]): Promise<void> {
 				latest_id: null,
 			}),
 		);
-		await shutdown();
+		await shutdownLocal();
 		return;
 	}
 
@@ -135,7 +135,7 @@ export async function run(args: string[]): Promise<void> {
 					actual_hash: entry.entry_hash,
 				}),
 			);
-			await shutdown();
+			await shutdownLocal();
 			return;
 		}
 
@@ -153,7 +153,7 @@ export async function run(args: string[]): Promise<void> {
 						actual_hash: entry.prev_hash,
 					}),
 				);
-				await shutdown();
+				await shutdownLocal();
 				return;
 			}
 		} else if (i > 0) {
@@ -170,7 +170,7 @@ export async function run(args: string[]): Promise<void> {
 						actual_hash: entry.prev_hash,
 					}),
 				);
-				await shutdown();
+				await shutdownLocal();
 				return;
 			}
 		}
@@ -185,7 +185,7 @@ export async function run(args: string[]): Promise<void> {
 			latest_id: entries[entries.length - 1].id,
 		}),
 	);
-	await shutdown();
+	await shutdownLocal();
 }
 
 // Self-executable entry point.
