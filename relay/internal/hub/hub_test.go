@@ -60,7 +60,9 @@ func newTestServer(t *testing.T, ctx context.Context) (*httptest.Server, *hub.Hu
 			"connections": h.ClientCount(),
 		}
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(status)
+		if err := json.NewEncoder(w).Encode(status); err != nil {
+			t.Logf("health encode error: %v", err)
+		}
 	})
 
 	srv := httptest.NewServer(r)

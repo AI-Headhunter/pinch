@@ -3,11 +3,11 @@ import { isToolEntrypoint, parseConnectionArg } from "./cli.js";
 
 describe("parseConnectionArg", () => {
 	it("extracts --connection value", () => {
-		expect(parseConnectionArg(["--connection", "pinch:abc@relay.host"])).toEqual(
-			{
-				connection: "pinch:abc@relay.host",
-			},
-		);
+		expect(
+			parseConnectionArg(["--connection", "pinch:abc@relay.host"]),
+		).toEqual({
+			connection: "pinch:abc@relay.host",
+		});
 	});
 
 	it("throws when --connection is missing", () => {
