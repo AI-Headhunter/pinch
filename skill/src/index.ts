@@ -25,7 +25,7 @@ export { InboundRouter } from "./inbound-router.js";
 export type { RoutedMessage } from "./inbound-router.js";
 
 // Autonomy
-export { ActivityFeed } from "./autonomy/activity-feed.js";
+export { ActivityFeed, computeEntryHash } from "./autonomy/activity-feed.js";
 export type { ActivityEvent } from "./autonomy/activity-feed.js";
 export { defaultPermissionsManifest, validateManifest } from "./autonomy/permissions-manifest.js";
 export type { PermissionsManifest, CalendarPermission, FilePermission, ActionPermission, SpendingCaps, CustomCategory } from "./autonomy/permissions-manifest.js";
