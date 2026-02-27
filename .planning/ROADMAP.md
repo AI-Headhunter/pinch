@@ -119,7 +119,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation and Crypto Primitives | 0/3 | Not started | - |
+| 1. Foundation and Crypto Primitives | 2/3 | In Progress | - |
 | 2. Authentication and Connection | 0/2 | Not started | - |
 | 3. Encrypted 1:1 Messaging | 0/2 | Not started | - |
 | 4. Store-and-Forward | 0/1 | Not started | - |
