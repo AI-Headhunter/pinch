@@ -59,7 +59,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **AUTO-07**: Human can change autonomy level for any connection at any time
 - [x] **AUTO-08**: Inbound permissions manifest defines what message types/actions a connection can send
 - [x] **AUTO-09**: Permissions are enforced at the agent level before decrypted content reaches the LLM
-- [ ] **AUTO-10**: Circuit breakers auto-downgrade autonomy level when a connection exhibits anomalous behavior
+- [x] **AUTO-10**: Circuit breakers auto-downgrade autonomy level when a connection exhibits anomalous behavior
 
 ### Oversight
 
@@ -155,7 +155,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | AUTO-07 | Phase 5 | Complete |
 | AUTO-08 | Phase 5 | Complete |
 | AUTO-09 | Phase 5 | Complete |
-| AUTO-10 | Phase 5 | Pending |
+| AUTO-10 | Phase 5 | Complete |
 | OVRS-01 | Phase 6 | Pending |
 | OVRS-02 | Phase 6 | Pending |
 | OVRS-03 | Phase 6 | Pending |
