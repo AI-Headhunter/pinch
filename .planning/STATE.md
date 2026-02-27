@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-26)
 
 **Core value:** Agents can securely message each other with human consent and oversight at every step -- no message flows without explicit human approval of the connection.
-**Current focus:** Phase 4 complete -- Store-and-Forward fully wired. Ready for Phase 5.
+**Current focus:** Phase 5 -- Full Autonomy and Permissions. 4-tier autonomy system implemented.
 
 ## Current Position
 
-Phase: 4 of 6 (Store-and-Forward) -- COMPLETE
-Plan: 2 of 2 in current phase (complete)
-Status: Phase Complete
-Last activity: 2026-02-27 -- Completed 04-02-PLAN.md
+Phase: 5 of 6 (Full Autonomy and Permissions)
+Plan: 1 of 3 in current phase (complete)
+Status: In Progress
+Last activity: 2026-02-27 -- Completed 05-01-PLAN.md
 
-Progress: [█████████░] 90%
+Progress: [█████████░] 93%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 13
+- Total plans completed: 14
 - Average duration: 6min
-- Total execution time: 1.4 hours
+- Total execution time: 1.5 hours
 
 **By Phase:**
 
@@ -31,9 +31,10 @@ Progress: [█████████░] 90%
 | 02 | 4 | 24min | 6min |
 | 03 | 4 | 23min | 6min |
 | 04 | 2 | 15min | 8min |
+| 05 | 1 | 6min | 6min |
 
 **Recent Trend:**
-- Last 5 plans: 03-03 (5min), 03-04 (4min), 04-01 (5min), 04-02 (10min)
+- Last 5 plans: 03-04 (4min), 04-01 (5min), 04-02 (10min), 05-01 (6min)
 - Trend: stable
 
 *Updated after each plan completion*
@@ -47,6 +48,7 @@ Progress: [█████████░] 90%
 | Phase 03 P04 | 4min | 2 tasks | 13 files |
 | Phase 04 P01 | 5min | 2 tasks | 10 files |
 | Phase 04 P02 | 10min | 2 tasks | 7 files |
+| Phase 05 P01 | 6min | 2 tasks | 12 files |
 
 ## Accumulated Context
 
@@ -102,6 +104,10 @@ Recent decisions affecting current work:
 - [04-02]: Flushing flag uses sync/atomic for lock-free reads on hot routing path
 - [04-02]: Messages during flush enqueued to bbolt (not real-time) to preserve chronological ordering
 - [04-02]: PINCH_RELAY_QUEUE_MAX and PINCH_RELAY_QUEUE_TTL env vars for configurable queue settings
+- [05-01]: ActivityFeed shares SQLite database via MessageStore.getDb() accessor (type-safe shared access)
+- [05-01]: InboundRouter activityFeed parameter is optional (3rd param) for backward compatibility
+- [05-01]: Confirmation gate for full_auto applies from any level (not just full_manual)
+- [05-01]: circuitBreakerTripped cleared on any setAutonomy call (human manual override)
 
 ### Pending Todos
 
@@ -114,5 +120,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-27
-Stopped at: Completed 04-02-PLAN.md (Phase 4 complete)
+Stopped at: Completed 05-01-PLAN.md
 Resume file: None
