@@ -536,12 +536,19 @@ func TestRouteMessageBlockedSenderSilentDrop(t *testing.T) {
 		t.Fatalf("write: %v", err)
 	}
 
-	// Bob should NOT receive the message.
-	readCtx, readCancel := context.WithTimeout(ctx, 500*time.Millisecond)
-	_, _, err = bobConn.Read(readCtx)
-	readCancel()
-	if err == nil {
+	// Bob should NOT receive the message. Use a non-canceling read probe so we
+	// don't close the connection due a read timeout side effect.
+	gotMessage := make(chan struct{}, 1)
+	go func() {
+		_, _, readErr := bobConn.Read(context.Background())
+		if readErr == nil {
+			gotMessage <- struct{}{}
+		}
+	}()
+	select {
+	case <-gotMessage:
 		t.Fatal("expected bob to NOT receive a message from blocked alice")
+	case <-time.After(500 * time.Millisecond):
 	}
 
 	// Alice should still be connected (no error indication).
