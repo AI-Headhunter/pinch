@@ -10,7 +10,10 @@
   },
   "dependencies": {
     "@bufbuild/protobuf": "^2.11.0",
-    "@pinch/proto": "workspace:*"
+    "@pinch/proto": "workspace:*",
+    "bs58": "^6.0.0",
+    "libsodium-wrappers-sumo": "0.8.0",
+    "ws": "^8.19.0"
   },
   "devDependencies": {
     "@biomejs/biome": "latest",
