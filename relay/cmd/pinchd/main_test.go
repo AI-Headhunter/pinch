@@ -323,7 +323,7 @@ func TestHealthHandlerAllowsLoopback(t *testing.T) {
 	}
 }
 
-func TestHealthHandlerRejectsNonLoopback(t *testing.T) {
+func TestHealthHandlerAllowsNonLoopback(t *testing.T) {
 	h := hub.NewHub(nil, nil, nil)
 	handler := healthHandler(h)
 
@@ -332,7 +332,8 @@ func TestHealthHandlerRejectsNonLoopback(t *testing.T) {
 	rec := httptest.NewRecorder()
 	handler.ServeHTTP(rec, req)
 
-	if rec.Code != http.StatusForbidden {
-		t.Fatalf("expected 403 forbidden, got %d", rec.Code)
+	// External health checks are allowed (required for Railway healthcheck.railway.app).
+	if rec.Code != http.StatusOK {
+		t.Fatalf("expected 200 OK for external health check, got %d", rec.Code)
 	}
 }

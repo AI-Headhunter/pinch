@@ -15,7 +15,9 @@
     "pinch-intervene": "./dist/tools/pinch-intervene.js",
     "pinch-mute": "./dist/tools/pinch-mute.js",
     "pinch-audit-verify": "./dist/tools/pinch-audit-verify.js",
-    "pinch-audit-export": "./dist/tools/pinch-audit-export.js"
+    "pinch-audit-export": "./dist/tools/pinch-audit-export.js",
+    "pinch-whoami": "./dist/tools/pinch-whoami.js",
+    "pinch-claim": "./dist/tools/pinch-claim.js"
   },
   "scripts": {
     "build": "tsc",

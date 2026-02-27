@@ -2,8 +2,12 @@ package main
 
 import (
 	"context"
+	"crypto/ed25519"
+	"crypto/subtle"
+	"encoding/base64"
 	"encoding/json"
 	"errors"
+	"io"
 	"log/slog"
 	"net"
 	"net/http"
@@ -34,6 +38,8 @@ type wsConfig struct {
 	authChallengeTTL time.Duration
 	authTimeout      time.Duration
 	nowFn            func() time.Time
+	keyRegistry      *store.KeyRegistry // nil = open mode
+	adminSecret      string
 }
 
 func main() {
@@ -51,6 +57,8 @@ func main() {
 		slog.Error("invalid PINCH_RELAY_ALLOWED_ORIGINS", "error", err)
 		os.Exit(1)
 	}
+
+	adminSecret := os.Getenv("PINCH_RELAY_ADMIN_SECRET")
 
 	dbPath := os.Getenv("PINCH_RELAY_DB")
 	if dbPath == "" {
@@ -110,6 +118,18 @@ func main() {
 	slog.Info("message queue ready", "maxPerAgent", queueMax, "ttl", queueTTL)
 	mq.StartSweep(ctx)
 
+	keyReg, err := store.NewKeyRegistry(db)
+	if err != nil {
+		slog.Error("failed to initialize key registry", "error", err)
+		os.Exit(1)
+	}
+	keyReg.SweepPending(24 * time.Hour)
+	if adminSecret != "" {
+		slog.Info("relay running in locked mode")
+	} else {
+		slog.Info("relay running in open mode")
+	}
+
 	rl := hub.NewRateLimiter(rate.Limit(rateLimit), rateBurst)
 	slog.Info("rate limiter ready", "rate", rateLimit, "burst", rateBurst)
 
@@ -124,8 +144,12 @@ func main() {
 		authChallengeTTL: 10 * time.Second,
 		authTimeout:      10 * time.Second,
 		nowFn:            time.Now,
+		keyRegistry:      keyReg,
+		adminSecret:      adminSecret,
 	}))
 	r.Get("/health", healthHandler(h))
+	r.Post("/agents/register", registerHandler(keyReg, publicHost))
+	r.Post("/agents/claim", claimHandler(keyReg, adminSecret))
 
 	srv := &http.Server{
 		Addr:    ":" + port,
@@ -183,6 +207,17 @@ func wsHandler(serverCtx context.Context, h *hub.Hub, cfg wsConfig) http.Handler
 			return
 		}
 
+		// Locked mode: reject keys that have not been approved via registration.
+		if cfg.adminSecret != "" && cfg.keyRegistry != nil {
+			pubKeyB64 := base64.StdEncoding.EncodeToString(pubKey)
+			if !cfg.keyRegistry.IsApproved(pubKeyB64) {
+				slog.Warn("key not registered", "address", address)
+				_ = sendAuthResult(conn, false, "", "key not registered")
+				_ = conn.Close(websocket.StatusPolicyViolation, "key not registered")
+				return
+			}
+		}
+
 		client := hub.NewClient(h, conn, address, pubKey, serverCtx)
 		if err := h.Register(client); err != nil {
 			slog.Warn("registration failed", "address", address, "error", err)
@@ -203,6 +238,113 @@ func wsHandler(serverCtx context.Context, h *hub.Hub, cfg wsConfig) http.Handler
 		go client.ReadPump()
 		go client.WritePump()
 		go client.HeartbeatLoop()
+	}
+}
+
+// registerHandler is a public endpoint that registers a pending agent key.
+// Returns the derived address and a claim code for the operator to approve.
+func registerHandler(keyReg *store.KeyRegistry, relayPublicHost string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		body, err := io.ReadAll(io.LimitReader(r.Body, 4096))
+		if err != nil {
+			http.Error(w, "failed to read body", http.StatusBadRequest)
+			return
+		}
+
+		var req struct {
+			PublicKey string `json:"public_key"`
+		}
+		if err := json.Unmarshal(body, &req); err != nil {
+			http.Error(w, "invalid JSON", http.StatusBadRequest)
+			return
+		}
+		if req.PublicKey == "" {
+			http.Error(w, "public_key is required", http.StatusBadRequest)
+			return
+		}
+
+		pubKeyBytes, err := base64.StdEncoding.DecodeString(req.PublicKey)
+		if err != nil {
+			http.Error(w, "public_key must be standard base64", http.StatusBadRequest)
+			return
+		}
+		if len(pubKeyBytes) != ed25519.PublicKeySize {
+			http.Error(w, "public_key must be 32 bytes (Ed25519)", http.StatusBadRequest)
+			return
+		}
+
+		pubKey := ed25519.PublicKey(pubKeyBytes)
+		address := auth.DeriveAddress(pubKey, relayPublicHost)
+
+		claimCode, err := keyReg.RegisterPending(req.PublicKey, address)
+		if err != nil {
+			slog.Error("register pending failed", "error", err)
+			http.Error(w, "internal error", http.StatusInternalServerError)
+			return
+		}
+
+		slog.Info("agent registration pending", "address", address, "claim_code", claimCode)
+
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(map[string]string{
+			"address":    address,
+			"claim_code": claimCode,
+		})
+	}
+}
+
+// claimHandler is an admin endpoint that approves a pending registration.
+// Returns 404 if locked mode is not enabled (no admin secret configured).
+func claimHandler(keyReg *store.KeyRegistry, adminSecret string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if adminSecret == "" {
+			http.NotFound(w, r)
+			return
+		}
+
+		body, err := io.ReadAll(io.LimitReader(r.Body, 4096))
+		if err != nil {
+			http.Error(w, "failed to read body", http.StatusBadRequest)
+			return
+		}
+
+		var req struct {
+			ClaimCode   string `json:"claim_code"`
+			AdminSecret string `json:"admin_secret"`
+		}
+		if err := json.Unmarshal(body, &req); err != nil {
+			http.Error(w, "invalid JSON", http.StatusBadRequest)
+			return
+		}
+
+		if subtle.ConstantTimeCompare([]byte(req.AdminSecret), []byte(adminSecret)) != 1 {
+			http.Error(w, "forbidden", http.StatusForbidden)
+			return
+		}
+
+		if req.ClaimCode == "" {
+			http.Error(w, "claim_code is required", http.StatusBadRequest)
+			return
+		}
+
+		address, err := keyReg.Claim(req.ClaimCode)
+		if err != nil {
+			if errors.Is(err, store.ErrClaimNotFound) {
+				http.Error(w, "claim code not found or expired", http.StatusNotFound)
+				return
+			}
+			slog.Error("claim failed", "error", err)
+			http.Error(w, "internal error", http.StatusInternalServerError)
+			return
+		}
+
+		slog.Info("agent approved", "address", address)
+
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(map[string]string{
+			"address": address,
+			"status":  "approved",
+		})
 	}
 }
 
