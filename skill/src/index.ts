@@ -27,6 +27,12 @@ export type { RoutedMessage } from "./inbound-router.js";
 // Autonomy
 export { ActivityFeed } from "./autonomy/activity-feed.js";
 export type { ActivityEvent } from "./autonomy/activity-feed.js";
+export { defaultPermissionsManifest, validateManifest } from "./autonomy/permissions-manifest.js";
+export type { PermissionsManifest, CalendarPermission, FilePermission, ActionPermission, SpendingCaps, CustomCategory } from "./autonomy/permissions-manifest.js";
+export { PermissionsEnforcer } from "./autonomy/permissions-enforcer.js";
+export type { EnforcementResult } from "./autonomy/permissions-enforcer.js";
+export { NoOpPolicyEvaluator } from "./autonomy/policy-evaluator.js";
+export type { PolicyEvaluator, PolicyDecision } from "./autonomy/policy-evaluator.js";
 
 // Delivery
 export { signDeliveryConfirmation, verifyDeliveryConfirmation } from "./delivery.js";
