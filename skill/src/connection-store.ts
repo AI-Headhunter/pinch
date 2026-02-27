@@ -14,6 +14,11 @@
 import { readFile, writeFile, mkdir } from "node:fs/promises";
 import { dirname } from "node:path";
 import { validateAddress } from "./identity.js";
+import {
+	type PermissionsManifest,
+	defaultPermissionsManifest,
+	validateManifest,
+} from "./autonomy/permissions-manifest.js";
 
 /** Connection lifecycle states. */
 export type ConnectionState =
@@ -42,6 +47,8 @@ export interface Connection {
 	autoRespondPolicy?: string;
 	/** Whether the circuit breaker has been tripped (persists across restarts). */
 	circuitBreakerTripped?: boolean;
+	/** Permissions manifest for domain-specific capability tiers. */
+	permissionsManifest?: PermissionsManifest;
 	/** Free-text message from connection request (max 280 chars). */
 	shortMessage?: string;
 	/** ISO timestamp when connection was created. */
@@ -153,6 +160,9 @@ export class ConnectionStore {
 			...conn,
 			// Enforce default autonomy = full_manual per AUTO-02.
 			autonomyLevel: conn.autonomyLevel ?? "full_manual",
+			// Enforce deny-by-default permissions manifest.
+			permissionsManifest:
+				conn.permissionsManifest ?? defaultPermissionsManifest(),
 			createdAt: now,
 			lastActivity: now,
 		};
@@ -178,6 +188,7 @@ export class ConnectionStore {
 				| "lastActivity"
 				| "autoRespondPolicy"
 				| "circuitBreakerTripped"
+				| "permissionsManifest"
 			>
 		>,
 	): Connection {
@@ -235,6 +246,26 @@ export class ConnectionStore {
 		}
 
 		return this.updateConnection(peerAddress, { autonomyLevel: level });
+	}
+
+	/**
+	 * Set the permissions manifest for a connection.
+	 * Validates the manifest before applying.
+	 * @throws If the connection does not exist or manifest is invalid.
+	 */
+	setPermissions(
+		peerAddress: string,
+		manifest: PermissionsManifest,
+	): Connection {
+		const errors = validateManifest(manifest);
+		if (errors.length > 0) {
+			throw new Error(
+				`Invalid permissions manifest: ${errors.join("; ")}`,
+			);
+		}
+		return this.updateConnection(peerAddress, {
+			permissionsManifest: manifest,
+		});
 	}
 
 	/**
