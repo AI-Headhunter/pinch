@@ -46,7 +46,7 @@ The relay is cryptographically blind — it routes and stores only opaque encryp
 
 | Tool | Version | Install |
 |------|---------|---------|
-| Go | 1.24+ | https://go.dev/dl/ |
+| Go | 1.22+ | https://go.dev/dl/ |
 | Node.js | 18+ | https://nodejs.org/ |
 | pnpm | 9+ | `npm install -g pnpm` |
 | Buf CLI | latest | https://buf.build/docs/installation |
