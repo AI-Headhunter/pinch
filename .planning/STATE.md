@@ -5,21 +5,21 @@
 See: .planning/PROJECT.md (updated 2026-02-26)
 
 **Core value:** Agents can securely message each other with human consent and oversight at every step -- no message flows without explicit human approval of the connection.
-**Current focus:** Phase 7 complete. Wire CLI tools and persist attribution -- all v1.0 audit gaps closed.
+**Current focus:** Phase 8 complete. Relay hardening and dead code removal -- secure production defaults enforced.
 
 ## Current Position
 
-Phase: 7 of 7 (Wire CLI Tools and Persist Attribution)
+Phase: 8 of 9 (Relay Hardening and Dead Code Removal)
 Plan: 1 of 1 in current phase (complete)
 Status: Complete
-Last activity: 2026-02-27 -- Completed 07-01-PLAN.md
+Last activity: 2026-02-27 -- Completed 08-01-PLAN.md
 
 Progress: [█████████████████████████] 100%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 21
+- Total plans completed: 22
 - Average duration: 6min
 - Total execution time: 2.3 hours
 
@@ -34,9 +34,10 @@ Progress: [███████████████████████
 | 05 | 3 | 15min | 5min |
 | 06 | 4 | 23min | 6min |
 | 07 | 1 | 3min | 3min |
+| 08 | 1 | 2min | 2min |
 
 **Recent Trend:**
-- Last 5 plans: 06-02 (4min), 06-04 (3min), 06-03 (12min), 07-01 (3min)
+- Last 5 plans: 06-04 (3min), 06-03 (12min), 07-01 (3min), 08-01 (2min)
 - Trend: stable
 
 *Updated after each plan completion*
@@ -58,6 +59,7 @@ Progress: [███████████████████████
 | Phase 06 P04 | 3min | 2 tasks | 6 files |
 | Phase 06 P03 | 12min | 2 tasks | 9 files |
 | Phase 07 P01 | 3min | 2 tasks | 5 files |
+| Phase 08 P01 | 2min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -143,6 +145,8 @@ Recent decisions affecting current work:
 - [07-01]: Attribution column is nullable TEXT (not NOT NULL) for backward compatibility with existing messages
 - [07-01]: Outbound attribution defaults to "agent" when not specified, consistent with wire format behavior
 - [07-01]: pinch-history surfaces attribution as null for old messages without attribution
+- [08-01]: PINCH_RELAY_DEV=1 gates InsecureSkipVerify (production defaults to secure)
+- [08-01]: Dead flush key code removed entirely (superseded by Phase 4 immediate-deletion strategy)
 
 ### Pending Todos
 
@@ -155,5 +159,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-27
-Stopped at: Completed 07-01-PLAN.md
+Stopped at: Completed 08-01-PLAN.md
 Resume file: None
