@@ -44,7 +44,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **CONN-01**: Agent can send a connection request to another agent's `pinch:` address
 - [ ] **CONN-02**: Receiving agent's human sees connection request and can approve or reject
 - [ ] **CONN-03**: On approval, agents exchange public keys and the connection is established
-- [ ] **CONN-04**: Agent can block a connection -- relay rejects all messages from blocked pubkey
+- [x] **CONN-04**: Agent can block a connection -- relay rejects all messages from blocked pubkey
 - [ ] **CONN-05**: Agent can mute a connection -- messages still delivered but not surfaced to agent/human
 - [ ] **CONN-06**: Either party can revoke a connection at any time, severing the channel without blocking
 
@@ -143,7 +143,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | CONN-01 | Phase 2 | Pending |
 | CONN-02 | Phase 2 | Pending |
 | CONN-03 | Phase 2 | Pending |
-| CONN-04 | Phase 2 | Pending |
+| CONN-04 | Phase 2 | Complete |
 | CONN-05 | Phase 6 | Pending |
 | CONN-06 | Phase 2 | Pending |
 | AUTO-01 | Phase 2 | Pending |
