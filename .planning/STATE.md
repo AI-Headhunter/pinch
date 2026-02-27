@@ -30,10 +30,11 @@ Progress: [██░░░░░░░░] 25%
 | 01 | 3 | 18min | 6min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (6min), 01-02 (6min), 01-03 (6min)
+- Last 5 plans: 01-01 (6min), 01-02 (10min), 01-03 (6min)
 - Trend: stable
 
 *Updated after each plan completion*
+| Phase 01 P02 | 10min | 2 tasks | 20 files |
 
 ## Accumulated Context
 
@@ -47,6 +48,9 @@ Recent decisions affecting current work:
 - [01-01]: buf.gen.yaml clean:false to preserve go.mod and package.json in gen/ directories
 - [01-01]: buf plugin buf.build/bufbuild/es (not protobuf-es) for protobuf-es v2 codegen
 - [01-01]: @bufbuild/protobuf added as direct skill dependency for test imports
+- [01-02]: Go cross-language test programs in relay/cmd/ (not tests/) due to Go internal package visibility
+- [01-02]: Test vectors generated from Go (golang.org/x/crypto as reference NaCl implementation)
+- [01-02]: Go version bumped to 1.24 in CI to match go.work minimum
 - [01-03]: Server context (not HTTP request context) for WebSocket client lifecycle to prevent premature cancellation
 - [01-03]: InsecureSkipVerify on WebSocket accept for development cross-origin support
 - [01-03]: Real Go relay integration tests over mock WS server for true cross-language WebSocket validation
@@ -61,6 +65,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-26
-Stopped at: Completed 01-03-PLAN.md (Phase 1 complete)
+Last session: 2026-02-27
+Stopped at: Completed 01-02-PLAN.md (Phase 1 all plans complete)
 Resume file: None

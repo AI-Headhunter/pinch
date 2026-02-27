@@ -9,9 +9,9 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Identity
 
-- [ ] **IDNT-01**: Agent can generate an Ed25519 keypair and persist it securely
-- [ ] **IDNT-02**: Agent derives a `pinch:<hash>@<relay>` address from its public key
-- [ ] **IDNT-03**: Agent can load an existing keypair from storage on startup
+- [x] **IDNT-01**: Agent can generate an Ed25519 keypair and persist it securely
+- [x] **IDNT-02**: Agent derives a `pinch:<hash>@<relay>` address from its public key
+- [x] **IDNT-03**: Agent can load an existing keypair from storage on startup
 
 ### Protocol
 
@@ -34,9 +34,9 @@ Requirements for initial release. Each maps to roadmap phases.
 ### Encryption
 
 - [ ] **CRYP-01**: Agent encrypts 1:1 messages using NaCl box (X25519 key exchange + XSalsa20-Poly1305)
-- [ ] **CRYP-02**: Agent converts Ed25519 signing keys to X25519 encryption keys using libsodium/edwards25519
-- [ ] **CRYP-03**: Every encrypted message uses a unique 24-byte random nonce from CSPRNG, prepended to ciphertext
-- [ ] **CRYP-04**: Cross-language crypto roundtrip tests pass in CI (Go encrypts/TS decrypts and vice versa)
+- [x] **CRYP-02**: Agent converts Ed25519 signing keys to X25519 encryption keys using libsodium/edwards25519
+- [x] **CRYP-03**: Every encrypted message uses a unique 24-byte random nonce from CSPRNG, prepended to ciphertext
+- [x] **CRYP-04**: Cross-language crypto roundtrip tests pass in CI (Go encrypts/TS decrypts and vice versa)
 - [ ] **CRYP-05**: Sender receives E2E signed delivery confirmation when message is delivered to recipient
 
 ### Connection
@@ -120,9 +120,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| IDNT-01 | Phase 1 | Pending |
-| IDNT-02 | Phase 1 | Pending |
-| IDNT-03 | Phase 1 | Pending |
+| IDNT-01 | Phase 1 | Complete |
+| IDNT-02 | Phase 1 | Complete |
+| IDNT-03 | Phase 1 | Complete |
 | PROT-01 | Phase 1 | Complete |
 | PROT-02 | Phase 1 | Complete |
 | PROT-03 | Phase 1 | Complete |
@@ -136,9 +136,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | RELY-07 | Phase 6 | Pending |
 | RELY-08 | Phase 1 | Complete |
 | CRYP-01 | Phase 3 | Pending |
-| CRYP-02 | Phase 1 | Pending |
-| CRYP-03 | Phase 1 | Pending |
-| CRYP-04 | Phase 1 | Pending |
+| CRYP-02 | Phase 1 | Complete |
+| CRYP-03 | Phase 1 | Complete |
+| CRYP-04 | Phase 1 | Complete |
 | CRYP-05 | Phase 3 | Pending |
 | CONN-01 | Phase 2 | Pending |
 | CONN-02 | Phase 2 | Pending |
