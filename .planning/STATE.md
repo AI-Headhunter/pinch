@@ -9,35 +9,36 @@ See: .planning/PROJECT.md (updated 2026-02-26)
 
 ## Current Position
 
-Phase: 2 of 6 (Authentication and Connection)
-Plan: 3 of 4 in current phase
-Status: In Progress
-Last activity: 2026-02-27 -- Completed 02-03-PLAN.md
+Phase: 2 of 6 (Authentication and Connection) -- COMPLETE
+Plan: 4 of 4 in current phase
+Status: Phase Complete
+Last activity: 2026-02-27 -- Completed 02-04-PLAN.md
 
-Progress: [█████░░░░░] 46%
+Progress: [██████░░░░] 54%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 6
+- Total plans completed: 7
 - Average duration: 6min
-- Total execution time: 0.6 hours
+- Total execution time: 0.7 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01 | 3 | 18min | 6min |
-| 02 | 3 | 17min | 6min |
+| 02 | 4 | 24min | 6min |
 
 **Recent Trend:**
-- Last 5 plans: 01-03 (6min), 02-01 (5min), 02-02 (4min), 02-03 (8min)
+- Last 5 plans: 02-01 (5min), 02-02 (4min), 02-03 (8min), 02-04 (7min)
 - Trend: stable
 
 *Updated after each plan completion*
 | Phase 02 P01 | 5min | 2 tasks | 8 files |
 | Phase 02 P02 | 4min | 2 tasks | 8 files |
 | Phase 02 P03 | 8min | 2 tasks | 6 files |
+| Phase 02 P04 | 7min | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -68,6 +69,10 @@ Recent decisions affecting current work:
 - [02-03]: RelayClient auth handshake uses state machine (awaiting_challenge -> awaiting_result -> done)
 - [02-03]: Connection store sorts by state priority (active > pending_inbound > pending_outbound > revoked > blocked)
 - [02-03]: Blocking is reversible -- blocked -> active transition allowed (unblock restores connection)
+- [02-04]: sendEnvelope delegates to existing send() -- thin typed wrapper, no new transport layer
+- [02-04]: onEnvelope runs alongside onMessage (both fire for post-auth messages) to avoid breaking existing consumers
+- [02-04]: Silent rejection sends zero bytes -- rejectRequest only updates local store, indistinguishable from offline
+- [02-04]: Integration tests spawn real Go relay via go run for true cross-language validation
 
 ### Pending Todos
 
@@ -80,5 +85,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-27
-Stopped at: Completed 02-03-PLAN.md
+Stopped at: Completed 02-04-PLAN.md (Phase 2 complete)
 Resume file: None
