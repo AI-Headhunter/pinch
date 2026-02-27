@@ -5,36 +5,37 @@
 See: .planning/PROJECT.md (updated 2026-02-26)
 
 **Core value:** Agents can securely message each other with human consent and oversight at every step -- no message flows without explicit human approval of the connection.
-**Current focus:** Phase 1: Foundation and Crypto Primitives
+**Current focus:** Phase 2: Authentication and Connection
 
 ## Current Position
 
-Phase: 1 of 6 (Foundation and Crypto Primitives)
-Plan: 3 of 3 in current phase
-Status: Phase Complete
-Last activity: 2026-02-26 -- Completed 01-03-PLAN.md
+Phase: 2 of 6 (Authentication and Connection)
+Plan: 1 of 4 in current phase
+Status: In Progress
+Last activity: 2026-02-27 -- Completed 02-01-PLAN.md
 
-Progress: [██░░░░░░░░] 25%
+Progress: [███░░░░░░░] 30%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 3
+- Total plans completed: 4
 - Average duration: 6min
-- Total execution time: 0.3 hours
+- Total execution time: 0.4 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01 | 3 | 18min | 6min |
+| 02 | 1 | 5min | 5min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (6min), 01-02 (10min), 01-03 (6min)
+- Last 5 plans: 01-01 (6min), 01-02 (10min), 01-03 (6min), 02-01 (5min)
 - Trend: stable
 
 *Updated after each plan completion*
-| Phase 01 P02 | 10min | 2 tasks | 20 files |
+| Phase 02 P01 | 5min | 2 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -54,6 +55,10 @@ Recent decisions affecting current work:
 - [01-03]: Server context (not HTTP request context) for WebSocket client lifecycle to prevent premature cancellation
 - [01-03]: InsecureSkipVerify on WebSocket accept for development cross-origin support
 - [01-03]: Real Go relay integration tests over mock WS server for true cross-language WebSocket validation
+- [02-01]: Auth module delegates to identity.GenerateAddress for address derivation (single source of truth)
+- [02-01]: performAuth extracted as separate function from wsHandler for testability
+- [02-01]: WebSocket close code 4001 for auth failures (custom application code per spec)
+- [Phase 02-01]: Auth module delegates to identity.GenerateAddress for address derivation (single source of truth)
 
 ### Pending Todos
 
@@ -66,5 +71,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-27
-Stopped at: Completed 01-02-PLAN.md (Phase 1 all plans complete)
+Stopped at: Completed 02-01-PLAN.md
 Resume file: None
