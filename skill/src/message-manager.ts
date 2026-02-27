@@ -38,6 +38,7 @@ export interface SendMessageParams {
 	threadId?: string;
 	replyTo?: string;
 	priority?: "low" | "normal" | "urgent";
+	attribution?: "agent" | "human";
 }
 
 /**
@@ -99,13 +100,18 @@ export class MessageManager {
 		// 5. Get next sequence number
 		const sequence = this.messageStore.nextSequence(recipient);
 
-		// 6-7. Build and serialize PlaintextPayload
+		// 6-7. Build and serialize PlaintextPayload with attribution wrapper
+		const attribution = params.attribution ?? "agent";
+		const wrappedContent = JSON.stringify({
+			text: body,
+			attribution,
+		});
 		const plaintext = create(PlaintextPayloadSchema, {
 			version: 1,
 			sequence: BigInt(sequence),
 			timestamp: BigInt(Date.now()),
-			content: new TextEncoder().encode(body),
-			contentType: "text/plain",
+			content: new TextEncoder().encode(wrappedContent),
+			contentType: "application/x-pinch+json",
 		});
 		const plaintextBytes = toBinary(PlaintextPayloadSchema, plaintext);
 
@@ -205,8 +211,20 @@ export class MessageManager {
 		// 7. Deserialize PlaintextPayload
 		const plaintextPayload = fromBinary(PlaintextPayloadSchema, decryptedBytes);
 
-		// 8. Extract text body
-		const body = new TextDecoder().decode(plaintextPayload.content);
+		// 8. Extract text body with attribution detection
+		const rawBody = new TextDecoder().decode(plaintextPayload.content);
+		let body = rawBody;
+		let inboundAttribution: "agent" | "human" = "agent";
+		if (plaintextPayload.contentType === "application/x-pinch+json") {
+			try {
+				const parsed = JSON.parse(rawBody);
+				body = parsed.text ?? rawBody;
+				inboundAttribution = parsed.attribution ?? "agent";
+			} catch {
+				// Not valid JSON -- use raw body
+				body = rawBody;
+			}
+		}
 
 		// 9. Derive messageId
 		const messageId = new TextDecoder().decode(envelope.messageId);
