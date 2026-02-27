@@ -167,6 +167,7 @@ export class MessageManager {
 			priority,
 			sequence,
 			state: "sent",
+			attribution: params.attribution ?? "agent",
 			createdAt: now,
 			updatedAt: now,
 		});
@@ -239,6 +240,7 @@ export class MessageManager {
 			sequence: Number(plaintextPayload.sequence),
 			state: "delivered",
 			priority: "normal",
+			attribution: inboundAttribution,
 			createdAt: now,
 			updatedAt: now,
 		};

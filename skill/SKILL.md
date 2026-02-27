@@ -155,6 +155,7 @@ pinch-history --connection "pinch:abc123@relay.example.com" --limit 10
     "priority": "normal",
     "sequence": 1,
     "state": "read_by_agent",
+    "attribution": "agent",
     "createdAt": "2026-02-27T04:00:00.000Z",
     "updatedAt": "2026-02-27T04:00:00.000Z"
   }
