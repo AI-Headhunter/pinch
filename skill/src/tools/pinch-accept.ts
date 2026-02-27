@@ -11,7 +11,12 @@
  * Outputs JSON: { "status": "accepted", "connection": "<address>" }
  */
 
-import { bootstrap, shutdown } from "./cli.js";
+import {
+	bootstrap,
+	parseConnectionArg,
+	runToolEntrypoint,
+	shutdown,
+} from "./cli.js";
 
 /** Parsed arguments for pinch_accept. */
 export interface AcceptArgs {
@@ -20,18 +25,7 @@ export interface AcceptArgs {
 
 /** Parse CLI arguments into a structured object. */
 export function parseArgs(args: string[]): AcceptArgs {
-	let connection = "";
-
-	for (let i = 0; i < args.length; i++) {
-		switch (args[i]) {
-			case "--connection":
-				connection = args[++i] ?? "";
-				break;
-		}
-	}
-
-	if (!connection) throw new Error("--connection is required");
-
+	const { connection } = parseConnectionArg(args);
 	return { connection };
 }
 
@@ -52,14 +46,4 @@ export async function run(args: string[]): Promise<void> {
 	await shutdown();
 }
 
-// Self-executable entry point.
-if (
-	process.argv[1] &&
-	(process.argv[1].endsWith("pinch-accept.ts") ||
-		process.argv[1].endsWith("pinch-accept.js"))
-) {
-	run(process.argv.slice(2)).catch((err) => {
-		console.error(JSON.stringify({ error: String(err.message ?? err) }));
-		process.exit(1);
-	});
-}
+runToolEntrypoint("pinch-accept", run);

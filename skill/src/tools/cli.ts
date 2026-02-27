@@ -43,6 +43,47 @@ export interface BootstrapResult {
 
 let bootstrapped: BootstrapResult | null = null;
 
+/** Parse the required `--connection` flag used by connection-management tools. */
+export function parseConnectionArg(args: string[]): { connection: string } {
+	let connection = "";
+	for (let i = 0; i < args.length; i++) {
+		if (args[i] === "--connection") {
+			connection = args[++i] ?? "";
+			break;
+		}
+	}
+
+	if (!connection) throw new Error("--connection is required");
+	return { connection };
+}
+
+/** True when running as the named tool script (ts or built js). */
+export function isToolEntrypoint(
+	scriptPath: string | undefined,
+	toolName: string,
+): boolean {
+	if (!scriptPath) return false;
+	return (
+		scriptPath.endsWith(`${toolName}.ts`) ||
+		scriptPath.endsWith(`${toolName}.js`)
+	);
+}
+
+/**
+ * Run a tool when the current process is executing its script directly.
+ * This keeps entrypoint/error boilerplate shared across CLI tools.
+ */
+export function runToolEntrypoint(
+	toolName: string,
+	runFn: (args: string[]) => Promise<void>,
+): void {
+	if (!isToolEntrypoint(process.argv[1], toolName)) return;
+	runFn(process.argv.slice(2)).catch((err) => {
+		console.error(JSON.stringify({ error: String(err.message ?? err) }));
+		process.exit(1);
+	});
+}
+
 /**
  * Initialize all runtime components from environment variables.
  *
