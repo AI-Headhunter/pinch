@@ -115,6 +115,30 @@ func authenticateConnection(t *testing.T, conn *websocket.Conn, priv ed25519.Pri
 	}
 }
 
+func readAuthResult(t *testing.T, conn *websocket.Conn) *pinchv1.AuthResult {
+	t.Helper()
+
+	readCtx, readCancel := context.WithTimeout(context.Background(), time.Second)
+	defer readCancel()
+	messageType, resultBytes, err := conn.Read(readCtx)
+	if err != nil {
+		t.Fatalf("read auth result: %v", err)
+	}
+	if messageType != websocket.MessageBinary {
+		t.Fatalf("expected binary auth result, got message type %d", messageType)
+	}
+
+	env := &pinchv1.Envelope{}
+	if err := proto.Unmarshal(resultBytes, env); err != nil {
+		t.Fatalf("decode auth result: %v", err)
+	}
+	result := env.GetAuthResult()
+	if result == nil {
+		t.Fatalf("expected auth result payload, got %+v", env.GetPayload())
+	}
+	return result
+}
+
 func TestWSHandlerAuthenticatesAndRegistersClient(t *testing.T) {
 	cfg := wsConfig{
 		relayPublicHost:  "relay.example.com",
@@ -140,6 +164,11 @@ func TestWSHandlerAuthenticatesAndRegistersClient(t *testing.T) {
 	t.Cleanup(func() { _ = conn.Close(websocket.StatusNormalClosure, "done") })
 
 	authenticateConnection(t, conn, priv)
+	result := readAuthResult(t, conn)
+	if !result.GetSuccess() {
+		t.Fatalf("expected auth success result, got failure: %s", result.GetErrorMessage())
+	}
+
 	expectedAddress := identity.GenerateAddress(pub, "relay.example.com")
 	waitForClientCount(t, ts.hub, 1, 2*time.Second)
 	if _, ok := ts.hub.LookupClient(expectedAddress); !ok {
@@ -191,6 +220,10 @@ func TestWSHandlerRejectsDuplicateAddress(t *testing.T) {
 	}
 	t.Cleanup(func() { _ = conn1.Close(websocket.StatusNormalClosure, "done") })
 	authenticateConnection(t, conn1, priv)
+	result1 := readAuthResult(t, conn1)
+	if !result1.GetSuccess() {
+		t.Fatalf("expected first auth to succeed, got failure: %s", result1.GetErrorMessage())
+	}
 	waitForClientCount(t, ts.hub, 1, 2*time.Second)
 
 	conn2, _, err := websocket.Dial(context.Background(), wsURL(ts.server.URL), nil)
@@ -199,6 +232,13 @@ func TestWSHandlerRejectsDuplicateAddress(t *testing.T) {
 	}
 	t.Cleanup(func() { _ = conn2.Close(websocket.StatusNormalClosure, "done") })
 	authenticateConnection(t, conn2, priv)
+	result2 := readAuthResult(t, conn2)
+	if result2.GetSuccess() {
+		t.Fatal("expected second auth result to fail for duplicate address")
+	}
+	if !strings.Contains(result2.GetErrorMessage(), "address already connected") {
+		t.Fatalf("unexpected duplicate-address error message: %q", result2.GetErrorMessage())
+	}
 
 	// Duplicate address should not increase active client count.
 	waitForClientCount(t, ts.hub, 1, 2*time.Second)
