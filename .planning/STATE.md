@@ -5,21 +5,21 @@
 See: .planning/PROJECT.md (updated 2026-02-26)
 
 **Core value:** Agents can securely message each other with human consent and oversight at every step -- no message flows without explicit human approval of the connection.
-**Current focus:** Phase 8 complete. Relay hardening and dead code removal -- secure production defaults enforced.
+**Current focus:** Phase 9 complete. Skill documentation and CLI optimization -- relay-free local bootstrap for CLI tools.
 
 ## Current Position
 
-Phase: 8 of 9 (Relay Hardening and Dead Code Removal)
+Phase: 9 of 9 (Skill Documentation and CLI Optimization)
 Plan: 1 of 1 in current phase (complete)
 Status: Complete
-Last activity: 2026-02-27 -- Completed 08-01-PLAN.md
+Last activity: 2026-02-27 -- Completed 09-01-PLAN.md
 
 Progress: [█████████████████████████] 100%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 22
+- Total plans completed: 23
 - Average duration: 6min
 - Total execution time: 2.3 hours
 
@@ -35,9 +35,10 @@ Progress: [███████████████████████
 | 06 | 4 | 23min | 6min |
 | 07 | 1 | 3min | 3min |
 | 08 | 1 | 2min | 2min |
+| 09 | 1 | 2min | 2min |
 
 **Recent Trend:**
-- Last 5 plans: 06-04 (3min), 06-03 (12min), 07-01 (3min), 08-01 (2min)
+- Last 5 plans: 06-03 (12min), 07-01 (3min), 08-01 (2min), 09-01 (2min)
 - Trend: stable
 
 *Updated after each plan completion*
@@ -60,6 +61,7 @@ Progress: [███████████████████████
 | Phase 06 P03 | 12min | 2 tasks | 9 files |
 | Phase 07 P01 | 3min | 2 tasks | 5 files |
 | Phase 08 P01 | 2min | 2 tasks | 3 files |
+| Phase 09 P01 | 2min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -147,6 +149,8 @@ Recent decisions affecting current work:
 - [07-01]: pinch-history surfaces attribution as null for old messages without attribution
 - [08-01]: PINCH_RELAY_DEV=1 gates InsecureSkipVerify (production defaults to secure)
 - [08-01]: Dead flush key code removed entirely (superseded by Phase 4 immediate-deletion strategy)
+- [09-01]: Separate localBootstrapped singleton (not reusing bootstrapped) to avoid interference between local and full bootstrap
+- [09-01]: bootstrapLocal() placed after shutdown() for logical file organization (full bootstrap section, then local bootstrap section)
 
 ### Pending Todos
 
@@ -159,5 +163,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-27
-Stopped at: Completed 08-01-PLAN.md
+Stopped at: Completed 09-01-PLAN.md
 Resume file: None
