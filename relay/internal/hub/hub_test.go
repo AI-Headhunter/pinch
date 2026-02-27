@@ -381,7 +381,11 @@ func newTestServerWithBlockStore(t *testing.T, ctx context.Context) (*httptest.S
 			return
 		}
 		client := hub.NewClient(h, conn, address, nil, ctx)
-		h.Register(client)
+		if err := h.Register(client); err != nil {
+			_ = conn.Close(websocket.StatusPolicyViolation, "duplicate address")
+			t.Logf("register error: %v", err)
+			return
+		}
 		go client.ReadPump()
 		go client.WritePump()
 		go client.HeartbeatLoop()
@@ -832,7 +836,11 @@ func newAuthTestServer(t *testing.T, ctx context.Context) (*httptest.Server, *hu
 
 		// Register after successful auth.
 		client := hub.NewClient(h, conn, address, pubKey, ctx)
-		h.Register(client)
+		if err := h.Register(client); err != nil {
+			_ = conn.Close(websocket.StatusPolicyViolation, "duplicate address")
+			t.Logf("register error: %v", err)
+			return
+		}
 		go client.ReadPump()
 		go client.WritePump()
 		go client.HeartbeatLoop()
@@ -1329,7 +1337,11 @@ func newTestServerWithMQ(t *testing.T, ctx context.Context, maxPerAgent int) (*h
 			return
 		}
 		client := hub.NewClient(h, conn, address, nil, ctx)
-		h.Register(client)
+		if err := h.Register(client); err != nil {
+			_ = conn.Close(websocket.StatusPolicyViolation, "duplicate address")
+			t.Logf("register error: %v", err)
+			return
+		}
 		go client.ReadPump()
 		go client.WritePump()
 		go client.HeartbeatLoop()
@@ -1611,37 +1623,4 @@ func TestFlushBeforeRealTime(t *testing.T) {
 	if rtEnv.FromAddress != "pinch:alice@localhost" {
 		t.Fatalf("expected real-time from alice, got %s", rtEnv.FromAddress)
 	}
-}
-
-// dialWSForHub is a helper that creates a test server for a hub and dials a WebSocket.
-// This is used when we need to interact with a specific hub instance directly.
-func dialWSForHub(ctx context.Context, t *testing.T, h *hub.Hub, address string) (*websocket.Conn, error) {
-	t.Helper()
-
-	r := chi.NewRouter()
-	r.Get("/ws", func(w http.ResponseWriter, r *http.Request) {
-		addr := r.URL.Query().Get("address")
-		if addr == "" {
-			http.Error(w, "missing address", http.StatusBadRequest)
-			return
-		}
-		conn, err := websocket.Accept(w, r, &websocket.AcceptOptions{
-			InsecureSkipVerify: true,
-		})
-		if err != nil {
-			t.Logf("websocket accept error: %v", err)
-			return
-		}
-		client := hub.NewClient(h, conn, addr, nil, ctx)
-		h.Register(client)
-		go client.ReadPump()
-		go client.WritePump()
-		go client.HeartbeatLoop()
-	})
-
-	srv := httptest.NewServer(r)
-	t.Cleanup(func() { srv.Close() })
-
-	conn, _, err := websocket.Dial(ctx, wsURL(srv, address), nil)
-	return conn, err
 }
