@@ -1,0 +1,141 @@
+package hub
+
+import (
+	"context"
+	"log/slog"
+	"time"
+
+	"github.com/coder/websocket"
+)
+
+const (
+	// heartbeatInterval is how often the server pings the client.
+	heartbeatInterval = 25 * time.Second
+
+	// pongTimeout is how long to wait for a pong response.
+	pongTimeout = 7 * time.Second
+
+	// readTimeout is the maximum time to wait for a message from the client.
+	readTimeout = 60 * time.Second
+
+	// writeTimeout is the maximum time to wait for a write to complete.
+	writeTimeout = 10 * time.Second
+
+	// sendBufferSize is the capacity of the outbound message channel.
+	sendBufferSize = 256
+)
+
+// Client represents a single WebSocket connection to the hub.
+// Each client has its own read, write, and heartbeat goroutines
+// managed by a shared context.
+type Client struct {
+	hub     *Hub
+	conn    *websocket.Conn
+	address string
+	send    chan []byte
+	ctx     context.Context
+	cancel  context.CancelFunc
+}
+
+// NewClient creates a new Client bound to the given hub and WebSocket connection.
+// The address is the pinch: address claimed by the connecting agent.
+// The provided context controls the client's lifecycle; cancelling it
+// stops all client goroutines.
+func NewClient(hub *Hub, conn *websocket.Conn, address string, ctx context.Context) *Client {
+	clientCtx, cancel := context.WithCancel(ctx)
+	return &Client{
+		hub:     hub,
+		conn:    conn,
+		address: address,
+		send:    make(chan []byte, sendBufferSize),
+		ctx:     clientCtx,
+		cancel:  cancel,
+	}
+}
+
+// ReadPump reads messages from the WebSocket connection.
+// For Phase 1, received messages are discarded -- this goroutine
+// exists to detect disconnection and keep the connection alive.
+// When ReadPump exits, the client is unregistered from the hub.
+func (c *Client) ReadPump() {
+	defer func() {
+		c.hub.Unregister(c)
+	}()
+
+	for {
+		readCtx, readCancel := context.WithTimeout(c.ctx, readTimeout)
+		_, _, err := c.conn.Read(readCtx)
+		readCancel()
+		if err != nil {
+			if c.ctx.Err() == nil {
+				slog.Debug("read error",
+					"address", c.address,
+					"error", err,
+				)
+			}
+			return
+		}
+		// Phase 1: discard received messages (no routing yet)
+	}
+}
+
+// WritePump writes messages from the send channel to the WebSocket connection.
+// It exits when the client context is cancelled or the send channel is closed.
+func (c *Client) WritePump() {
+	for {
+		select {
+		case msg, ok := <-c.send:
+			if !ok {
+				// Channel closed -- hub has unregistered this client.
+				_ = c.conn.Close(websocket.StatusNormalClosure, "closed")
+				return
+			}
+			writeCtx, writeCancel := context.WithTimeout(c.ctx, writeTimeout)
+			err := c.conn.Write(writeCtx, websocket.MessageBinary, msg)
+			writeCancel()
+			if err != nil {
+				slog.Debug("write error",
+					"address", c.address,
+					"error", err,
+				)
+				return
+			}
+
+		case <-c.ctx.Done():
+			return
+		}
+	}
+}
+
+// HeartbeatLoop sends periodic pings to the client to verify the connection
+// is alive. If a pong is not received within pongTimeout, the connection
+// is closed and the client goroutines will exit via context cancellation.
+func (c *Client) HeartbeatLoop() {
+	ticker := time.NewTicker(heartbeatInterval)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-c.ctx.Done():
+			return
+
+		case <-ticker.C:
+			pingCtx, pingCancel := context.WithTimeout(c.ctx, pongTimeout)
+			err := c.conn.Ping(pingCtx)
+			pingCancel()
+			if err != nil {
+				slog.Info("heartbeat failed",
+					"address", c.address,
+					"error", err,
+				)
+				_ = c.conn.Close(websocket.StatusPolicyViolation, "heartbeat timeout")
+				return
+			}
+		}
+	}
+}
+
+// Address returns the client's pinch: address.
+func (c *Client) Address() string {
+	return c.address
+}

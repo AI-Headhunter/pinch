@@ -1,0 +1,28 @@
+{
+  "vectors": [
+    {
+      "ed25519_seed": "0000000000000000000000000000000000000000000000000000000000000001",
+      "ed25519_public_key": "4cb5abf6ad79fbf5abbccafcc269d85cd2651ed4b885b5869f241aedf0a5ba29",
+      "ed25519_private_key": "00000000000000000000000000000000000000000000000000000000000000014cb5abf6ad79fbf5abbccafcc269d85cd2651ed4b885b5869f241aedf0a5ba29",
+      "x25519_public_key": "d92f5eeaa24fd4e66221c770f704a5e2639a476bab82cfec40bd2874abeb481f",
+      "x25519_private_key": "f068e2f7ccc3eee220065e1dc937d34d548ec59be6488fea5ae1397e63f81c52",
+      "address": "pinch:anSpcKpdMpR5GgdWktTxJHrow4AapjhmPGBfj3F1qr3HEbMcn@test.relay.example.com"
+    },
+    {
+      "ed25519_seed": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "ed25519_public_key": "e734ea6c2b6257de72355e472aa05a4c487e6b463c029ed306df2f01b5636b58",
+      "ed25519_private_key": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaae734ea6c2b6257de72355e472aa05a4c487e6b463c029ed306df2f01b5636b58",
+      "x25519_public_key": "552291f02c9317519633021302d0f7ba39b1cf32310e23ee7aa6a4312ae4a027",
+      "x25519_private_key": "00df8dd9e9eac760a1b68c1565388b1e93049b155baa8808cf4b4985f8665b68",
+      "address": "pinch:2kpsAVWeesP916eiCW6FxmgGQcrsvyQSp3JFsdjExT3sS8b2Nz@test.relay.example.com"
+    },
+    {
+      "ed25519_seed": "deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef",
+      "ed25519_public_key": "ff57575dc7af8bfc4d0837cc1ce2017b686a88145dc5579a958e3462fe9a908e",
+      "ed25519_private_key": "deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefff57575dc7af8bfc4d0837cc1ce2017b686a88145dc5579a958e3462fe9a908e",
+      "x25519_public_key": "dddc8c81ed5c7d4282195aaeb2419591bcb65cafd3ebdf0c9be21de1f59f1261",
+      "x25519_private_key": "60ad4863df8be83b831bacbddfba70ece1bc3699d730eb6bd0e52a705a65a94f",
+      "address": "pinch:2wTMAXNcBzkfwvmYVyWVNpLkMdTCzdmYrAZkREHx8EVaL6L3ur@test.relay.example.com"
+    }
+  ]
+}

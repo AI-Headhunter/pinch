@@ -9,34 +9,34 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Identity
 
-- [ ] **IDNT-01**: Agent can generate an Ed25519 keypair and persist it securely
-- [ ] **IDNT-02**: Agent derives a `pinch:<hash>@<relay>` address from its public key
-- [ ] **IDNT-03**: Agent can load an existing keypair from storage on startup
+- [x] **IDNT-01**: Agent can generate an Ed25519 keypair and persist it securely
+- [x] **IDNT-02**: Agent derives a `pinch:<hash>@<relay>` address from its public key
+- [x] **IDNT-03**: Agent can load an existing keypair from storage on startup
 
 ### Protocol
 
-- [ ] **PROT-01**: All wire messages use Protocol Buffers with shared `.proto` schema generating Go and TypeScript code
-- [ ] **PROT-02**: Protocol envelope includes a version field for future upgrades
-- [ ] **PROT-03**: Encrypted payloads include monotonically increasing sequence numbers for replay protection
-- [ ] **PROT-04**: Encrypted payloads include timestamps for replay protection and ordering
+- [x] **PROT-01**: All wire messages use Protocol Buffers with shared `.proto` schema generating Go and TypeScript code
+- [x] **PROT-02**: Protocol envelope includes a version field for future upgrades
+- [x] **PROT-03**: Encrypted payloads include monotonically increasing sequence numbers for replay protection
+- [x] **PROT-04**: Encrypted payloads include timestamps for replay protection and ordering
 
 ### Relay
 
-- [ ] **RELY-01**: Go relay server accepts WebSocket connections and routes encrypted blobs without inspecting content
+- [x] **RELY-01**: Go relay server accepts WebSocket connections and routes encrypted blobs without inspecting content
 - [ ] **RELY-02**: Relay authenticates agents via Ed25519 challenge-response (relay sends nonce, agent signs, relay verifies)
-- [ ] **RELY-03**: Relay maintains a hub routing table mapping `pinch:` addresses to active WebSocket connections
+- [x] **RELY-03**: Relay maintains a hub routing table mapping `pinch:` addresses to active WebSocket connections
 - [ ] **RELY-04**: Relay delivers messages in real-time when both agents are online (sub-100ms relay hop)
 - [ ] **RELY-05**: Relay queues encrypted messages in bbolt for offline agents with configurable TTL (7-day default)
 - [ ] **RELY-06**: Relay flushes queued messages to agent on reconnection in order
 - [ ] **RELY-07**: Relay enforces per-connection rate limiting (token bucket or sliding window)
-- [ ] **RELY-08**: Relay implements ping/pong heartbeats (20-30s interval, 5-10s pong timeout) to prevent goroutine leaks
+- [x] **RELY-08**: Relay implements ping/pong heartbeats (20-30s interval, 5-10s pong timeout) to prevent goroutine leaks
 
 ### Encryption
 
 - [ ] **CRYP-01**: Agent encrypts 1:1 messages using NaCl box (X25519 key exchange + XSalsa20-Poly1305)
-- [ ] **CRYP-02**: Agent converts Ed25519 signing keys to X25519 encryption keys using libsodium/edwards25519
-- [ ] **CRYP-03**: Every encrypted message uses a unique 24-byte random nonce from CSPRNG, prepended to ciphertext
-- [ ] **CRYP-04**: Cross-language crypto roundtrip tests pass in CI (Go encrypts/TS decrypts and vice versa)
+- [x] **CRYP-02**: Agent converts Ed25519 signing keys to X25519 encryption keys using libsodium/edwards25519
+- [x] **CRYP-03**: Every encrypted message uses a unique 24-byte random nonce from CSPRNG, prepended to ciphertext
+- [x] **CRYP-04**: Cross-language crypto roundtrip tests pass in CI (Go encrypts/TS decrypts and vice versa)
 - [ ] **CRYP-05**: Sender receives E2E signed delivery confirmation when message is delivered to recipient
 
 ### Connection
@@ -120,25 +120,25 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| IDNT-01 | Phase 1 | Pending |
-| IDNT-02 | Phase 1 | Pending |
-| IDNT-03 | Phase 1 | Pending |
-| PROT-01 | Phase 1 | Pending |
-| PROT-02 | Phase 1 | Pending |
-| PROT-03 | Phase 1 | Pending |
-| PROT-04 | Phase 1 | Pending |
-| RELY-01 | Phase 1 | Pending |
+| IDNT-01 | Phase 1 | Complete |
+| IDNT-02 | Phase 1 | Complete |
+| IDNT-03 | Phase 1 | Complete |
+| PROT-01 | Phase 1 | Complete |
+| PROT-02 | Phase 1 | Complete |
+| PROT-03 | Phase 1 | Complete |
+| PROT-04 | Phase 1 | Complete |
+| RELY-01 | Phase 1 | Complete |
 | RELY-02 | Phase 2 | Pending |
-| RELY-03 | Phase 1 | Pending |
+| RELY-03 | Phase 1 | Complete |
 | RELY-04 | Phase 3 | Pending |
 | RELY-05 | Phase 4 | Pending |
 | RELY-06 | Phase 4 | Pending |
 | RELY-07 | Phase 6 | Pending |
-| RELY-08 | Phase 1 | Pending |
+| RELY-08 | Phase 1 | Complete |
 | CRYP-01 | Phase 3 | Pending |
-| CRYP-02 | Phase 1 | Pending |
-| CRYP-03 | Phase 1 | Pending |
-| CRYP-04 | Phase 1 | Pending |
+| CRYP-02 | Phase 1 | Complete |
+| CRYP-03 | Phase 1 | Complete |
+| CRYP-04 | Phase 1 | Complete |
 | CRYP-05 | Phase 3 | Pending |
 | CONN-01 | Phase 2 | Pending |
 | CONN-02 | Phase 2 | Pending |

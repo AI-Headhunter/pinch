@@ -12,7 +12,7 @@ Pinch delivers secure agent-to-agent messaging in six phases following the depen
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Foundation and Crypto Primitives** - Monorepo scaffold, protobuf wire format, Ed25519 identity, relay WebSocket skeleton, cross-language crypto tests
+- [x] **Phase 1: Foundation and Crypto Primitives** - Monorepo scaffold, protobuf wire format, Ed25519 identity, relay WebSocket skeleton, cross-language crypto tests (completed 2026-02-27)
 - [ ] **Phase 2: Authentication and Connection** - Challenge-response auth, connection request lifecycle, blocking, baseline autonomy (Full Manual + Full Auto)
 - [ ] **Phase 3: Encrypted 1:1 Messaging** - NaCl box E2E encryption, real-time message delivery, OpenClaw skill integration
 - [ ] **Phase 4: Store-and-Forward** - bbolt message queue at relay, TTL expiration, reconnect flush, delivery confirmations
@@ -119,7 +119,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation and Crypto Primitives | 0/3 | Not started | - |
+| 1. Foundation and Crypto Primitives | 2/3 | Complete    | 2026-02-27 |
 | 2. Authentication and Connection | 0/2 | Not started | - |
 | 3. Encrypted 1:1 Messaging | 0/2 | Not started | - |
 | 4. Store-and-Forward | 0/1 | Not started | - |

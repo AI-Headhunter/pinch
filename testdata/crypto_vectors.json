@@ -1,0 +1,40 @@
+{
+  "vectors": [
+    {
+      "description": "Basic text encryption",
+      "sender_ed25519_seed": "0000000000000000000000000000000000000000000000000000000000000001",
+      "recipient_ed25519_seed": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "sender_x25519_pub": "d92f5eeaa24fd4e66221c770f704a5e2639a476bab82cfec40bd2874abeb481f",
+      "sender_x25519_priv": "f068e2f7ccc3eee220065e1dc937d34d548ec59be6488fea5ae1397e63f81c52",
+      "recipient_x25519_pub": "552291f02c9317519633021302d0f7ba39b1cf32310e23ee7aa6a4312ae4a027",
+      "recipient_x25519_priv": "00df8dd9e9eac760a1b68c1565388b1e93049b155baa8808cf4b4985f8665b68",
+      "nonce": "000102030405060708090a0b0c0d0e0f1011121314151617",
+      "plaintext": "48656c6c6f2c2050696e636821",
+      "ciphertext": "000102030405060708090a0b0c0d0e0f101112131415161738907320f7992d1e33b20e7ed610d72fcdbcc4499e61097af441442335"
+    },
+    {
+      "description": "Longer text encryption",
+      "sender_ed25519_seed": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "recipient_ed25519_seed": "deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef",
+      "sender_x25519_pub": "552291f02c9317519633021302d0f7ba39b1cf32310e23ee7aa6a4312ae4a027",
+      "sender_x25519_priv": "00df8dd9e9eac760a1b68c1565388b1e93049b155baa8808cf4b4985f8665b68",
+      "recipient_x25519_pub": "dddc8c81ed5c7d4282195aaeb2419591bcb65cafd3ebdf0c9be21de1f59f1261",
+      "recipient_x25519_priv": "60ad4863df8be83b831bacbddfba70ece1bc3699d730eb6bd0e52a705a65a94f",
+      "nonce": "aabbccddeeff00112233445566778899aabbccddeeff0011",
+      "plaintext": "43726f73732d6c616e67756167652063727970746f207465737420766563746f72",
+      "ciphertext": "aabbccddeeff00112233445566778899aabbccddeeff0011186f64c0a373e1ff9e8e75f584b3cccc548a526f52ddb199bac57cd93206bc4d09daeee54f7b7fa6a3bf7649e02ae76b07"
+    },
+    {
+      "description": "Binary data encryption",
+      "sender_ed25519_seed": "0000000000000000000000000000000000000000000000000000000000000001",
+      "recipient_ed25519_seed": "deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef",
+      "sender_x25519_pub": "d92f5eeaa24fd4e66221c770f704a5e2639a476bab82cfec40bd2874abeb481f",
+      "sender_x25519_priv": "f068e2f7ccc3eee220065e1dc937d34d548ec59be6488fea5ae1397e63f81c52",
+      "recipient_x25519_pub": "dddc8c81ed5c7d4282195aaeb2419591bcb65cafd3ebdf0c9be21de1f59f1261",
+      "recipient_x25519_priv": "60ad4863df8be83b831bacbddfba70ece1bc3699d730eb6bd0e52a705a65a94f",
+      "nonce": "ffeeddccbbaa99887766554433221100ffeeddccbbaa9988",
+      "plaintext": "deadbeef01020304",
+      "ciphertext": "ffeeddccbbaa99887766554433221100ffeeddccbbaa9988b41bf5ca83b319e3e77e785d67d28a18e2ad68ede6d6e2ac"
+    }
+  ]
+}

@@ -1,0 +1,65 @@
+syntax = "proto3";
+
+package pinch.v1;
+
+option go_package = "github.com/pinch-protocol/pinch/gen/go/pinch/v1;pinchv1";
+
+// MessageType enumerates all wire message types.
+enum MessageType {
+  MESSAGE_TYPE_UNSPECIFIED = 0;
+  MESSAGE_TYPE_HANDSHAKE = 1;
+  MESSAGE_TYPE_AUTH_CHALLENGE = 2;
+  MESSAGE_TYPE_AUTH_RESPONSE = 3;
+  MESSAGE_TYPE_MESSAGE = 4;
+  MESSAGE_TYPE_DELIVERY_CONFIRM = 5;
+  MESSAGE_TYPE_CONNECTION_REQUEST = 6;
+  MESSAGE_TYPE_CONNECTION_RESPONSE = 7;
+  MESSAGE_TYPE_HEARTBEAT = 8;
+}
+
+// Envelope is the outer wire message. The relay can read this for routing
+// but never sees the encrypted inner payload.
+message Envelope {
+  uint32 version = 1;
+  string from_address = 2;
+  string to_address = 3;
+  MessageType type = 4;
+  bytes message_id = 5;
+  int64 timestamp = 6;
+
+  oneof payload {
+    EncryptedPayload encrypted = 10;
+    Handshake handshake = 11;
+    Heartbeat heartbeat = 12;
+  }
+}
+
+// EncryptedPayload is an opaque encrypted blob. The relay cannot read this.
+message EncryptedPayload {
+  bytes nonce = 1;
+  bytes ciphertext = 2;
+  bytes sender_public_key = 3;
+}
+
+// PlaintextPayload exists only in decrypted form at the client.
+// Sequence and timestamp live inside the encryption boundary for
+// replay protection (the relay cannot tamper with these fields).
+message PlaintextPayload {
+  uint32 version = 1;
+  uint64 sequence = 2;
+  int64 timestamp = 3;
+  bytes content = 4;
+  string content_type = 5;
+}
+
+// Handshake is sent during initial connection setup.
+message Handshake {
+  uint32 version = 1;
+  bytes signing_key = 2;
+  bytes encryption_key = 3;
+}
+
+// Heartbeat is a keep-alive message.
+message Heartbeat {
+  int64 timestamp = 1;
+}

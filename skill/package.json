@@ -1,0 +1,25 @@
+{
+  "name": "@pinch/skill",
+  "version": "0.1.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run",
+    "lint": "biome check ."
+  },
+  "dependencies": {
+    "@bufbuild/protobuf": "^2.11.0",
+    "@pinch/proto": "workspace:*",
+    "bs58": "^6.0.0",
+    "libsodium-wrappers-sumo": "0.8.0",
+    "ws": "^8.19.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "latest",
+    "@types/ws": "latest",
+    "tsx": "^4.21.0",
+    "typescript": "latest",
+    "vitest": "latest"
+  }
+}
