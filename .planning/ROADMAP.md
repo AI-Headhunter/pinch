@@ -159,6 +159,10 @@ Plans:
 **Success Criteria** (what must be TRUE):
   1. SKILL.md lines 259-278 use correct permission tier names (`full_details`/`propose_and_book`/`specific_folders`/`everything`/`scoped`/`full`) instead of incorrect `read`/`read_write`/`execute`
   2. `pinch-permissions`, `pinch-audit-verify`, and `pinch-audit-export` CLI tools operate on local SQLite without opening a relay WebSocket connection
+**Plans**: 1 plan
+
+Plans:
+- [ ] 09-01-PLAN.md -- Add bootstrapLocal() for relay-free CLI operation, update three local-only tools
 
 ## Progress
 
@@ -175,4 +179,4 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 | 6. Oversight and Safety | 0/4 | Complete    | 2026-02-27 |
 | 7. Wire Phase 6 CLI Tools and Persist Attribution | 0/1 | Complete    | 2026-02-27 |
 | 8. Relay Hardening and Dead Code Removal | 0/0 | Complete    | 2026-02-27 |
-| 9. Skill Documentation and CLI Optimization | 0/0 | Not Started | - |
+| 9. Skill Documentation and CLI Optimization | 0/1 | Not Started | - |
