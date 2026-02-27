@@ -10,6 +10,7 @@ import (
 	"os"
 	"os/signal"
 	"runtime"
+	"strconv"
 	"syscall"
 	"time"
 
@@ -38,6 +39,20 @@ func main() {
 		dbPath = "./pinch-relay.db"
 	}
 
+	queueMax := 1000
+	if v := os.Getenv("PINCH_RELAY_QUEUE_MAX"); v != "" {
+		if n, err := strconv.Atoi(v); err == nil && n > 0 {
+			queueMax = n
+		}
+	}
+
+	queueTTLHours := 168 // 7 days
+	if v := os.Getenv("PINCH_RELAY_QUEUE_TTL"); v != "" {
+		if n, err := strconv.Atoi(v); err == nil && n > 0 {
+			queueTTLHours = n
+		}
+	}
+
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
 
@@ -54,15 +69,16 @@ func main() {
 		os.Exit(1)
 	}
 
-	mq, err := store.NewMessageQueue(db, 1000, 7*24*time.Hour)
+	queueTTL := time.Duration(queueTTLHours) * time.Hour
+	mq, err := store.NewMessageQueue(db, queueMax, queueTTL)
 	if err != nil {
 		slog.Error("failed to initialize message queue", "error", err)
 		os.Exit(1)
 	}
-	slog.Info("message queue ready", "maxPerAgent", 1000, "ttl", "7d")
-	_ = mq // Used in Plan 02 when hub integration is wired up
+	slog.Info("message queue ready", "maxPerAgent", queueMax, "ttl", queueTTL)
+	mq.StartSweep(ctx)
 
-	h := hub.NewHub(blockStore)
+	h := hub.NewHub(blockStore, mq)
 	go h.Run(ctx)
 
 	r := chi.NewRouter()
