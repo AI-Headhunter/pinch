@@ -15,7 +15,20 @@ var (
 	keyRegistryBucket     = []byte("key_registry")
 
 	ErrClaimNotFound = errors.New("claim code not found or expired")
+
+	errClaimCodeCollision = errors.New("claim code collision")
+	errClaimCodeExhausted = errors.New("failed to generate unique claim code")
+
+	claimCodeGenerator = func() (string, error) {
+		var code [4]byte
+		if _, err := rand.Read(code[:]); err != nil {
+			return "", err
+		}
+		return hex.EncodeToString(code[:]), nil
+	}
 )
+
+const maxClaimCodeGenerationAttempts = 8
 
 type pendingEntry struct {
 	PubKeyB64    string `json:"pubKeyB64"`
@@ -45,12 +58,6 @@ func NewKeyRegistry(db *bolt.DB) (*KeyRegistry, error) {
 
 // RegisterPending stores a pending registration and returns an 8-character hex claim code.
 func (kr *KeyRegistry) RegisterPending(pubKeyB64, address string) (string, error) {
-	var code [4]byte
-	if _, err := rand.Read(code[:]); err != nil {
-		return "", err
-	}
-	claimCode := hex.EncodeToString(code[:])
-
 	entry := pendingEntry{
 		PubKeyB64:    pubKeyB64,
 		Address:      address,
@@ -61,14 +68,29 @@ func (kr *KeyRegistry) RegisterPending(pubKeyB64, address string) (string, error
 		return "", err
 	}
 
-	err = kr.db.Update(func(tx *bolt.Tx) error {
-		b := tx.Bucket(pendingRegistryBucket)
-		return b.Put([]byte(claimCode), data)
-	})
-	if err != nil {
+	for attempt := 0; attempt < maxClaimCodeGenerationAttempts; attempt++ {
+		claimCode, genErr := claimCodeGenerator()
+		if genErr != nil {
+			return "", genErr
+		}
+
+		err = kr.db.Update(func(tx *bolt.Tx) error {
+			b := tx.Bucket(pendingRegistryBucket)
+			if b.Get([]byte(claimCode)) != nil {
+				return errClaimCodeCollision
+			}
+			return b.Put([]byte(claimCode), data)
+		})
+		if err == nil {
+			return claimCode, nil
+		}
+		if errors.Is(err, errClaimCodeCollision) {
+			continue
+		}
 		return "", err
 	}
-	return claimCode, nil
+
+	return "", errClaimCodeExhausted
 }
 
 // Claim approves a pending registration by claim code, moving it to the approved registry.
@@ -113,13 +135,12 @@ func (kr *KeyRegistry) IsApproved(pubKeyB64 string) bool {
 }
 
 // SweepPending removes pending registrations older than the given TTL.
-// Call once on startup to clean up stale entries.
-func (kr *KeyRegistry) SweepPending(ttl time.Duration) {
+func (kr *KeyRegistry) SweepPending(ttl time.Duration) error {
 	cutoff := time.Now().Add(-ttl).Unix()
-	_ = kr.db.Update(func(tx *bolt.Tx) error {
+	return kr.db.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket(pendingRegistryBucket)
 		var toDelete [][]byte
-		_ = b.ForEach(func(k, v []byte) error {
+		if err := b.ForEach(func(k, v []byte) error {
 			var entry pendingEntry
 			if err := json.Unmarshal(v, &entry); err != nil {
 				// Malformed entry — delete it.
@@ -130,9 +151,13 @@ func (kr *KeyRegistry) SweepPending(ttl time.Duration) {
 				toDelete = append(toDelete, append([]byte{}, k...))
 			}
 			return nil
-		})
+		}); err != nil {
+			return err
+		}
 		for _, k := range toDelete {
-			_ = b.Delete(k)
+			if err := b.Delete(k); err != nil {
+				return err
+			}
 		}
 		return nil
 	})

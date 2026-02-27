@@ -142,7 +142,9 @@ func TestSweepPending_RemovesExpiredEntries(t *testing.T) {
 	}
 
 	// Sweep with a TTL of 0 — all existing entries are immediately expired.
-	kr.SweepPending(0)
+	if err := kr.SweepPending(0); err != nil {
+		t.Fatalf("SweepPending: %v", err)
+	}
 
 	_, err = kr.Claim(code)
 	if err == nil {
@@ -164,7 +166,9 @@ func TestSweepPending_PreservesNonExpiredEntries(t *testing.T) {
 	code, _ := kr.RegisterPending(pubKeyB64, address)
 
 	// Sweep with a generous TTL — entry should survive.
-	kr.SweepPending(24 * time.Hour)
+	if err := kr.SweepPending(24 * time.Hour); err != nil {
+		t.Fatalf("SweepPending: %v", err)
+	}
 
 	got, err := kr.Claim(code)
 	if err != nil {
@@ -172,5 +176,18 @@ func TestSweepPending_PreservesNonExpiredEntries(t *testing.T) {
 	}
 	if got != address {
 		t.Errorf("expected address %q, got %q", address, got)
+	}
+}
+
+func TestSweepPending_ReturnsErrorWhenDBClosed(t *testing.T) {
+	db := openTestDB(t)
+	kr, _ := store.NewKeyRegistry(db)
+
+	if err := db.Close(); err != nil {
+		t.Fatalf("close db: %v", err)
+	}
+
+	if err := kr.SweepPending(time.Hour); err == nil {
+		t.Fatal("expected error from SweepPending on closed database")
 	}
 }

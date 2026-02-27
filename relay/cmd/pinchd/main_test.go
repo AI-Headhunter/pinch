@@ -3,9 +3,11 @@ package main
 import (
 	"context"
 	"crypto/ed25519"
+	"encoding/base64"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"strings"
 	"testing"
 	"time"
@@ -16,6 +18,9 @@ import (
 	"github.com/pinch-protocol/pinch/relay/internal/auth"
 	"github.com/pinch-protocol/pinch/relay/internal/hub"
 	"github.com/pinch-protocol/pinch/relay/internal/identity"
+	"github.com/pinch-protocol/pinch/relay/internal/store"
+	bolt "go.etcd.io/bbolt"
+	"golang.org/x/time/rate"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -63,6 +68,28 @@ func waitForClientCount(t *testing.T, h *hub.Hub, expected int, timeout time.Dur
 		time.Sleep(10 * time.Millisecond)
 	}
 	t.Fatalf("expected %d clients, got %d", expected, h.ClientCount())
+}
+
+func newTestKeyRegistry(t *testing.T) *store.KeyRegistry {
+	t.Helper()
+
+	f, err := os.CreateTemp(t.TempDir(), "pinchd-keyregistry-*.db")
+	if err != nil {
+		t.Fatalf("create temp db file: %v", err)
+	}
+	f.Close()
+
+	db, err := bolt.Open(f.Name(), 0600, nil)
+	if err != nil {
+		t.Fatalf("open temp db: %v", err)
+	}
+	t.Cleanup(func() { _ = db.Close() })
+
+	kr, err := store.NewKeyRegistry(db)
+	if err != nil {
+		t.Fatalf("NewKeyRegistry: %v", err)
+	}
+	return kr
 }
 
 func authenticateConnection(t *testing.T, conn *websocket.Conn, priv ed25519.PrivateKey) {
@@ -335,5 +362,31 @@ func TestHealthHandlerAllowsNonLoopback(t *testing.T) {
 	// External health checks are allowed (required for Railway healthcheck.railway.app).
 	if rec.Code != http.StatusOK {
 		t.Fatalf("expected 200 OK for external health check, got %d", rec.Code)
+	}
+}
+
+func TestRegisterHandlerRateLimitsRequests(t *testing.T) {
+	kr := newTestKeyRegistry(t)
+	limiter := rate.NewLimiter(1, 1)
+	handler := registerHandler(kr, "relay.example.com", limiter)
+
+	pubKey := make([]byte, ed25519.PublicKeySize)
+	for i := range pubKey {
+		pubKey[i] = byte(i + 1)
+	}
+	payload := `{"public_key":"` + base64.StdEncoding.EncodeToString(pubKey) + `"}`
+
+	req1 := httptest.NewRequest(http.MethodPost, "/agents/register", strings.NewReader(payload))
+	rec1 := httptest.NewRecorder()
+	handler.ServeHTTP(rec1, req1)
+	if rec1.Code != http.StatusOK {
+		t.Fatalf("expected first request to succeed, got %d body=%q", rec1.Code, rec1.Body.String())
+	}
+
+	req2 := httptest.NewRequest(http.MethodPost, "/agents/register", strings.NewReader(payload))
+	rec2 := httptest.NewRecorder()
+	handler.ServeHTTP(rec2, req2)
+	if rec2.Code != http.StatusTooManyRequests {
+		t.Fatalf("expected second request to be rate limited, got %d body=%q", rec2.Code, rec2.Body.String())
 	}
 }

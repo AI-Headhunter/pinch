@@ -42,6 +42,13 @@ type wsConfig struct {
 	adminSecret      string
 }
 
+const (
+	defaultPendingKeyTTLHours                  = 24
+	defaultPendingSweepIntervalMinutes         = 15
+	defaultRegisterRateLimit           float64 = 1.0
+	defaultRegisterRateBurst                   = 5
+)
+
 func main() {
 	port := os.Getenv("PINCH_RELAY_PORT")
 	if port == "" {
@@ -59,6 +66,34 @@ func main() {
 	}
 
 	adminSecret := os.Getenv("PINCH_RELAY_ADMIN_SECRET")
+
+	pendingKeyTTLHours := defaultPendingKeyTTLHours
+	if v := os.Getenv("PINCH_RELAY_PENDING_KEY_TTL_HOURS"); v != "" {
+		if n, err := strconv.Atoi(v); err == nil && n > 0 {
+			pendingKeyTTLHours = n
+		}
+	}
+
+	pendingSweepIntervalMinutes := defaultPendingSweepIntervalMinutes
+	if v := os.Getenv("PINCH_RELAY_PENDING_SWEEP_INTERVAL_MINUTES"); v != "" {
+		if n, err := strconv.Atoi(v); err == nil && n > 0 {
+			pendingSweepIntervalMinutes = n
+		}
+	}
+
+	registerRateLimit := defaultRegisterRateLimit
+	if v := os.Getenv("PINCH_RELAY_REGISTER_RATE_LIMIT"); v != "" {
+		if f, err := strconv.ParseFloat(v, 64); err == nil && f > 0 {
+			registerRateLimit = f
+		}
+	}
+
+	registerRateBurst := defaultRegisterRateBurst
+	if v := os.Getenv("PINCH_RELAY_REGISTER_RATE_BURST"); v != "" {
+		if n, err := strconv.Atoi(v); err == nil && n > 0 {
+			registerRateBurst = n
+		}
+	}
 
 	dbPath := os.Getenv("PINCH_RELAY_DB")
 	if dbPath == "" {
@@ -123,7 +158,26 @@ func main() {
 		slog.Error("failed to initialize key registry", "error", err)
 		os.Exit(1)
 	}
-	keyReg.SweepPending(24 * time.Hour)
+	pendingKeyTTL := time.Duration(pendingKeyTTLHours) * time.Hour
+	if err := keyReg.SweepPending(pendingKeyTTL); err != nil {
+		slog.Error("failed to sweep pending keys on startup", "error", err)
+		os.Exit(1)
+	}
+	pendingSweepInterval := time.Duration(pendingSweepIntervalMinutes) * time.Minute
+	go func() {
+		ticker := time.NewTicker(pendingSweepInterval)
+		defer ticker.Stop()
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case <-ticker.C:
+				if err := keyReg.SweepPending(pendingKeyTTL); err != nil {
+					slog.Warn("pending key sweep failed", "error", err)
+				}
+			}
+		}
+	}()
 	if adminSecret != "" {
 		slog.Info("relay running in locked mode")
 	} else {
@@ -132,6 +186,8 @@ func main() {
 
 	rl := hub.NewRateLimiter(rate.Limit(rateLimit), rateBurst)
 	slog.Info("rate limiter ready", "rate", rateLimit, "burst", rateBurst)
+	registerLimiter := rate.NewLimiter(rate.Limit(registerRateLimit), registerRateBurst)
+	slog.Info("register rate limiter ready", "rate", registerRateLimit, "burst", registerRateBurst)
 
 	h := hub.NewHub(blockStore, mq, rl)
 	go h.Run(ctx)
@@ -148,7 +204,7 @@ func main() {
 		adminSecret:      adminSecret,
 	}))
 	r.Get("/health", healthHandler(h))
-	r.Post("/agents/register", registerHandler(keyReg, publicHost))
+	r.Post("/agents/register", registerHandler(keyReg, publicHost, registerLimiter))
 	r.Post("/agents/claim", claimHandler(keyReg, adminSecret))
 
 	srv := &http.Server{
@@ -243,8 +299,13 @@ func wsHandler(serverCtx context.Context, h *hub.Hub, cfg wsConfig) http.Handler
 
 // registerHandler is a public endpoint that registers a pending agent key.
 // Returns the derived address and a claim code for the operator to approve.
-func registerHandler(keyReg *store.KeyRegistry, relayPublicHost string) http.HandlerFunc {
+func registerHandler(keyReg *store.KeyRegistry, relayPublicHost string, limiter *rate.Limiter) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		if limiter != nil && !limiter.Allow() {
+			http.Error(w, "rate limit exceeded", http.StatusTooManyRequests)
+			return
+		}
+
 		body, err := io.ReadAll(io.LimitReader(r.Body, 4096))
 		if err != nil {
 			http.Error(w, "failed to read body", http.StatusBadRequest)

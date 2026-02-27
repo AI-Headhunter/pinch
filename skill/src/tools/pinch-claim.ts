@@ -14,13 +14,7 @@
  *   pinch-claim DEAD1234
  */
 
-/** Derive the HTTP base URL from a WebSocket relay URL. */
-function relayBaseUrl(relayUrl: string): string {
-	return relayUrl
-		.replace(/^wss:\/\//, "https://")
-		.replace(/^ws:\/\//, "http://")
-		.replace(/\/ws$/, "");
-}
+import { relayBaseUrl } from "./relay-url.js";
 
 /** Execute the pinch-claim tool. */
 export async function run(args: string[]): Promise<void> {
