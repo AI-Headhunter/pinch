@@ -15,10 +15,10 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Protocol
 
-- [ ] **PROT-01**: All wire messages use Protocol Buffers with shared `.proto` schema generating Go and TypeScript code
-- [ ] **PROT-02**: Protocol envelope includes a version field for future upgrades
-- [ ] **PROT-03**: Encrypted payloads include monotonically increasing sequence numbers for replay protection
-- [ ] **PROT-04**: Encrypted payloads include timestamps for replay protection and ordering
+- [x] **PROT-01**: All wire messages use Protocol Buffers with shared `.proto` schema generating Go and TypeScript code
+- [x] **PROT-02**: Protocol envelope includes a version field for future upgrades
+- [x] **PROT-03**: Encrypted payloads include monotonically increasing sequence numbers for replay protection
+- [x] **PROT-04**: Encrypted payloads include timestamps for replay protection and ordering
 
 ### Relay
 
@@ -123,10 +123,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | IDNT-01 | Phase 1 | Pending |
 | IDNT-02 | Phase 1 | Pending |
 | IDNT-03 | Phase 1 | Pending |
-| PROT-01 | Phase 1 | Pending |
-| PROT-02 | Phase 1 | Pending |
-| PROT-03 | Phase 1 | Pending |
-| PROT-04 | Phase 1 | Pending |
+| PROT-01 | Phase 1 | Complete |
+| PROT-02 | Phase 1 | Complete |
+| PROT-03 | Phase 1 | Complete |
+| PROT-04 | Phase 1 | Complete |
 | RELY-01 | Phase 1 | Pending |
 | RELY-02 | Phase 2 | Pending |
 | RELY-03 | Phase 1 | Pending |
