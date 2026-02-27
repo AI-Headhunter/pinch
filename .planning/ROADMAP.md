@@ -16,7 +16,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 2: Authentication and Connection** - Challenge-response auth, connection request lifecycle, blocking, baseline autonomy (Full Manual + Full Auto) (completed 2026-02-27)
 - [x] **Phase 3: Encrypted 1:1 Messaging** - NaCl box E2E encryption, real-time message delivery, OpenClaw skill integration (completed 2026-02-27)
 - [ ] **Phase 4: Store-and-Forward** - bbolt message queue at relay, TTL expiration, reconnect flush, delivery confirmations
-- [ ] **Phase 5: Full Autonomy and Permissions** - 4-tier autonomy state machine, inbound permissions manifest, autonomy change controls
+- [x] **Phase 5: Full Autonomy and Permissions** - 4-tier autonomy state machine, inbound permissions manifest, autonomy change controls (completed 2026-02-27)
 - [ ] **Phase 6: Oversight and Safety** - Activity feed, human intervention, audit log with hash chaining, rate limiting, circuit breakers, muting
 
 ## Phase Details
@@ -129,5 +129,5 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 | 2. Authentication and Connection | 4/4 | Complete    | 2026-02-27 |
 | 3. Encrypted 1:1 Messaging | 1/4 | Complete    | 2026-02-27 |
 | 4. Store-and-Forward | 2/2 | Complete    | 2026-02-27 |
-| 5. Full Autonomy and Permissions | 0/3 | Not started | - |
+| 5. Full Autonomy and Permissions | 0/3 | Complete    | 2026-02-27 |
 | 6. Oversight and Safety | 0/2 | Not started | - |
