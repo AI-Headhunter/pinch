@@ -103,6 +103,7 @@ func main() {
 	slog.Info("rate limiter ready", "rate", rateLimit, "burst", rateBurst)
 
 	h := hub.NewHub(blockStore, mq, rl)
+	h.SetRelayHost(relayHost)
 	go h.Run(ctx)
 
 	r := chi.NewRouter()
