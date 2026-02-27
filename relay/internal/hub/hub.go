@@ -6,7 +6,6 @@ package hub
 
 import (
 	"context"
-	"encoding/hex"
 	"log/slog"
 	"sync"
 	"time"
@@ -262,25 +261,6 @@ func (h *Hub) RouteMessage(from *Client, envelope []byte) error {
 			"error", err,
 		)
 		return err
-	}
-
-	// Handle delivery confirmations for flush correlation: if the sender
-	// (from) has flush keys, check if this delivery confirm corresponds to
-	// a flushed message and delete it from the queue.
-	if env.Type == pinchv1.MessageType_MESSAGE_TYPE_DELIVERY_CONFIRM {
-		dc := env.GetDeliveryConfirm()
-		if dc != nil && h.mq != nil {
-			msgIdHex := hex.EncodeToString(dc.MessageId)
-			if bboltKey, ok := from.PopFlushKey(msgIdHex); ok {
-				if err := h.mq.Remove(from.Address(), bboltKey); err != nil {
-					slog.Error("failed to remove flushed message from queue",
-						"address", from.Address(),
-						"messageId", msgIdHex,
-						"error", err,
-					)
-				}
-			}
-		}
 	}
 
 	switch env.Type {
