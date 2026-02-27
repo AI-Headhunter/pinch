@@ -1,8 +1,11 @@
 {
-  "name": "@pinch/proto",
+  "name": "@pinch-protocol/proto",
   "version": "0.1.0",
   "type": "module",
-  "private": true,
+  "files": ["pinch"],
+  "exports": {
+    "./*": "./*"
+  },
   "dependencies": {
     "@bufbuild/protobuf": "^2.11.0"
   }

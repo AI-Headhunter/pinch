@@ -17,7 +17,7 @@ importers:
       '@bufbuild/protobuf':
         specifier: ^2.11.0
         version: 2.11.0
-      '@pinch/proto':
+      '@pinch-protocol/proto':
         specifier: workspace:*
         version: link:../gen/ts
       better-sqlite3:
