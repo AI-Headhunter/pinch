@@ -19,6 +19,8 @@ COPY relay/ ./relay/
 COPY gen/go/ ./gen/go/
 
 # Build static binary from workspace root
+# Increment CACHE_BUST to force a clean rebuild on Railway
+ARG CACHE_BUST=2
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
     go build -trimpath -ldflags="-s -w" \
     -o /out/pinchd \
