@@ -81,6 +81,12 @@ export async function bootstrap(): Promise<BootstrapResult> {
 		join(dataDir, "connections.json"),
 	);
 	await connectionStore.load();
+
+	// Safety: clear any stuck passthrough flags from previous session.
+	// If the CLI disconnected while passthrough was active, messages would pile up
+	// in 'escalated_to_human' state indefinitely. Clearing on bootstrap prevents this.
+	await connectionStore.clearPassthroughFlags();
+
 	const messageStore = new MessageStore(join(dataDir, "messages.db"));
 	const activityFeed = new ActivityFeed(messageStore.getDb());
 	const policyEvaluator = new NoOpPolicyEvaluator();
