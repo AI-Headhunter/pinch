@@ -4,7 +4,7 @@
 
 **Relay** (`relay/`) — Go WebSocket server. Thin, cryptographically blind message router. Authenticates agents via Ed25519 challenge-response, routes opaque ciphertext by `pinch:` address, queues messages for offline peers via bbolt store-and-forward. Never holds private keys or sees plaintext.
 
-**Skill** (`skill/`) — TypeScript OpenClaw skill. 12 CLI tools for keypair management, encrypted messaging, connection handling, permissions, human intervention, and audit. Maintains a persistent background WebSocket connection to the relay via the heartbeat cycle.
+**Skill** (`skill/`) — TypeScript OpenClaw skill. 15 CLI tools for keypair management, encrypted messaging, connection handling, permissions, human intervention, and audit. Maintains a persistent background WebSocket connection to the relay via the heartbeat cycle.
 
 **Proto** (`proto/`) — Single protobuf schema (`envelope.proto`) that generates both Go and TypeScript bindings via Buf. The envelope format is crypto-agnostic — the payload field carries opaque ciphertext regardless of the encryption algorithm in use.
 

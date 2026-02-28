@@ -38,7 +38,7 @@ pinch-status --id <message_id>
 
 ## Audit Chain Health
 
-- [ ] Run `pinch_audit_verify` -- hash chain integrity check
+- [ ] Run `pinch-audit-verify` -- hash chain integrity check
 - [ ] Check for any connections in passthrough mode that may need handback
 - [ ] Review recent activity feed for unexpected events or gaps
 
