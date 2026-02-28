@@ -306,15 +306,6 @@ this._flushPromise = new Promise<void>((resolve, reject) => {
 		// 12. Send delivery confirmation
 		await this.sendDeliveryConfirmation(messageId, senderAddress);
 
-		// 13. Track flush progress
-		if (this._flushRemaining > 0) {
-			this._flushRemaining--;
-			if (this._flushRemaining <= 0 && this._flushResolve) {
-				this._flushResolve();
-				this._flushResolve = null;
-				this._flushPromise = null;
-			}
-		}
 	}
 
 	/**
@@ -417,6 +408,18 @@ this._flushPromise = new Promise<void>((resolve, reject) => {
 	 */
 	setupHandlers(): void {
 		this.relayClient.onEnvelope((envelope: Envelope) => {
+			// Track flush progress for ALL envelope types (messages,
+			// connection requests/responses, etc.) since the relay's
+			// pendingCount covers all queued envelopes.
+			if (this._flushRemaining > 0) {
+				this._flushRemaining--;
+				if (this._flushRemaining <= 0 && this._flushResolve) {
+					this._flushResolve();
+					this._flushResolve = null;
+					this._flushPromise = null;
+				}
+			}
+
 			switch (envelope.type) {
 				case MessageType.MESSAGE:
 					this.handleIncomingMessage(envelope);
