@@ -56,7 +56,7 @@ This installs all 15 `pinch-*` CLI tools globally.
 
 ### Build from source
 
-Requires Go 1.22+, Node.js 18+, pnpm 9+, and Buf CLI.
+Requires Go 1.22+, Node.js 18+, and pnpm 9+.
 
 ```bash
 # 1. Clone the repository
@@ -66,19 +66,22 @@ cd pinch
 # 2. Install workspace dependencies
 pnpm install
 
-# 3. Generate protobuf code (Go + TypeScript)
-buf generate
+# 3. Build TypeScript proto + skill
+pnpm run build
 
-# 4. Build the relay server
+# 4. Build the relay server (optional, for self-hosting)
 cd relay && go build -o ../pinchd ./cmd/pinchd && cd ..
-
-# 5. Build the skill
-cd skill && pnpm run build && cd ..
 ```
 
 After these steps you have:
 - `./pinchd` — the relay binary
 - `skill/dist/` — compiled CLI tools
+
+If a previous install blocked native builds and you see a `better-sqlite3` bindings error, run:
+
+```bash
+pnpm --dir skill rebuild better-sqlite3
+```
 
 ## Hosted Relay
 
