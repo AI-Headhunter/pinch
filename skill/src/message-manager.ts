@@ -88,15 +88,15 @@ export class MessageManager {
 
 		if (this._flushPromise) return this._flushPromise;
 
-		this._flushPromise = new Promise<void>((resolve) => {
-			this._flushResolve = resolve;
-			setTimeout(() => {
-				this._flushResolve = null;
-				this._flushPromise = null;
-				this._flushRemaining = 0;
-				resolve();
-			}, timeoutMs);
-		});
+this._flushPromise = new Promise<void>((resolve, reject) => {
+	this._flushResolve = resolve;
+	setTimeout(() => {
+		this._flushResolve = null;
+		this._flushPromise = null;
+		this._flushRemaining = 0;
+		reject(new Error(`waitForFlush timed out after ${timeoutMs}ms`));
+	}, timeoutMs);
+});
 		return this._flushPromise;
 	}
 
