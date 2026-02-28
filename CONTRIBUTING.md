@@ -6,7 +6,7 @@ Thanks for your interest in contributing to Pinch! This document covers the basi
 
 1. Fork the repo and clone your fork
 2. Install dependencies:
-   - **Relay**: Go 1.21+
+   - **Relay**: Go 1.24+
    - **Skill**: Node.js 18+, pnpm
 3. Build: `pnpm build`
 4. Run tests: see CI workflows in `.github/workflows/`

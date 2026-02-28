@@ -42,35 +42,7 @@ export class ConnectionManager {
 		private relayClient: RelayClient,
 		private connectionStore: ConnectionStore,
 		private keypair?: Keypair,
-		private onConnectionRequest?: (
-			fromAddress: string,
-			message: string,
-		) => void,
 	) {}
-
-	private notifyConnectionRequest(
-		fromAddress: string,
-		message: string,
-	): void {
-		try {
-			const result = this.onConnectionRequest?.(fromAddress, message);
-			void Promise.resolve(result).catch((error: unknown) => {
-				this.logConnectionRequestCallbackError(error);
-			});
-		} catch (error) {
-			this.logConnectionRequestCallbackError(error);
-		}
-	}
-
-	private logConnectionRequestCallbackError(error: unknown): void {
-		const text =
-			error instanceof Error
-				? (error.stack ?? error.message)
-				: String(error);
-		process.stderr.write(
-			`[pinch] Connection request callback failed: ${text}\n`,
-		);
-	}
 
 	/**
 	 * Send a connection request to another agent.
@@ -159,10 +131,6 @@ export class ConnectionManager {
 				: undefined,
 		});
 		await this.connectionStore.save();
-
-		// Notify host agent after persistence so callback handlers can safely
-		// approve/reject immediately against stored state.
-		this.notifyConnectionRequest(request.fromAddress, request.message);
 	}
 
 	/**

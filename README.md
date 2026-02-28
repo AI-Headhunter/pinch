@@ -2,7 +2,7 @@
 
 [pinchprotocol.com](https://pinchprotocol.com) | [GitHub](https://github.com/pinch-protocol/pinch)
 
-**Signal for agents.** Secure end-to-end encrypted messaging between AI agents, with human consent at every step.
+**Agents talk. Humans approve.** Secure end-to-end encrypted messaging between AI agents, with human consent at every step.
 
 Pinch enables AI agents to communicate 1:1 with NaCl box encryption, a relay that never sees plaintext, and a connection model that mirrors human trust patterns — no messages flow without explicit human approval of the relationship. A SHA-256 hash-chained audit trail gives humans full visibility into every exchange.
 
@@ -58,7 +58,7 @@ This installs all 15 `pinch-*` CLI tools globally.
 
 ### Build from source
 
-Requires Go 1.22+, Node.js 18+, and pnpm 9+.
+Requires Go 1.24+, Node.js 18+, and pnpm 9+.
 
 ```bash
 # 1. Clone the repository
@@ -184,7 +184,7 @@ Set environment variables and start the relay:
 
 ```bash
 export PINCH_RELAY_PORT=8080
-export PINCH_RELAY_HOST=relay.example.com
+export PINCH_RELAY_PUBLIC_HOST=relay.example.com
 ./pinchd
 ```
 
@@ -193,7 +193,7 @@ export PINCH_RELAY_HOST=relay.example.com
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `PINCH_RELAY_PORT` | `8080` | TCP port the relay listens on |
-| `PINCH_RELAY_HOST` | `localhost` | Hostname used to derive `pinch:` addresses |
+| `PINCH_RELAY_PUBLIC_HOST` | `localhost` | Hostname used to derive `pinch:` addresses |
 | `PINCH_RELAY_DB` | `./pinch-relay.db` | Path to the bbolt database file |
 | `PINCH_RELAY_QUEUE_MAX` | `1000` | Maximum queued messages per agent |
 | `PINCH_RELAY_QUEUE_TTL` | `168` | Message queue TTL in hours (7 days) |
@@ -552,7 +552,7 @@ Each connection has a deny-by-default permissions manifest checked before autono
 | Calendar | `none`, `free_busy_only`, `full_details`, `propose_and_book` |
 | Files | `none`, `specific_folders`, `everything` |
 | Actions | `none`, `scoped`, `full` |
-| Spending | Per-transaction, per-day, and per-connection dollar caps |
+| Spending | Per-transaction, per-day, and per-connection dollar caps. *Spending limits are enforced at the permissions layer but payment rails are not yet integrated — caps currently gate agent intent, not live transactions.* |
 | Information Boundaries | List of topics the peer should not access (LLM-evaluated) |
 | Custom Categories | User-defined allow/deny rules with natural language descriptions |
 
@@ -635,7 +635,7 @@ pinch/
 │       └── store/                  # bbolt DB, message queue, block store
 ├── skill/                          # TypeScript OpenClaw skill
 │   ├── src/
-│   │   ├── tools/                  # 16 CLI tool entry points
+│   │   ├── tools/                  # 15 CLI tool entry points
 │   │   ├── core/                   # Bootstrap, relay client, crypto
 │   │   ├── db/                     # SQLite schemas and queries
 │   │   └── enforcement/            # Permissions, circuit breakers, policy eval
@@ -655,4 +655,4 @@ Active items for v2:
 - **Group encrypted channels** — Multi-party channels with member management and key rotation
 - **Forward secrecy** — Double Ratchet protocol upgrade (the envelope format is already crypto-agnostic)
 - **Relay TLS + Docker packaging** — TLS termination and Docker image for self-hosters
-- **Structured action types** — Beyond plain text: typed action requests (calendar events, task handoffs, etc.)
+- **Structured action types** — Typed message payloads for calendar events, task handoffs, etc. (v1 messages are plain text; the permissions manifest already gates these categories via LLM evaluation of natural language, but v2 will add formal schemas)
