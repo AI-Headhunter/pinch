@@ -151,6 +151,8 @@ export class MessageManager {
 		const wrappedContent = JSON.stringify({
 			text: body,
 			attribution,
+			threadId,
+			replyTo,
 		});
 		const plaintext = create(PlaintextPayloadSchema, {
 			version: 1,
@@ -262,11 +264,15 @@ export class MessageManager {
 		const rawBody = new TextDecoder().decode(plaintextPayload.content);
 		let body = rawBody;
 		let inboundAttribution: "agent" | "human" = "agent";
+		let threadId: string | undefined;
+		let replyTo: string | undefined;
 		if (plaintextPayload.contentType === "application/x-pinch+json") {
 			try {
 				const parsed = JSON.parse(rawBody);
 				body = parsed.text ?? rawBody;
 				inboundAttribution = parsed.attribution ?? "agent";
+				threadId = parsed.threadId;
+				replyTo = parsed.replyTo;
 			} catch {
 				// Not valid JSON -- use raw body
 				body = rawBody;
@@ -283,6 +289,8 @@ export class MessageManager {
 			connectionAddress: senderAddress,
 			direction: "inbound",
 			body,
+			threadId,
+			replyTo,
 			sequence: Number(plaintextPayload.sequence),
 			state: "delivered",
 			priority: "normal",
