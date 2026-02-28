@@ -124,6 +124,19 @@ describe("RelayClient with auth handshake", () => {
 		await waitForConnections(0);
 	});
 
+	it("connects when relay URL already ends with /ws", async () => {
+		const keypair = await generateKeypair();
+		const client = new RelayClient(`${RELAY_URL}/ws`, keypair, RELAY_HOST);
+		await client.connect();
+
+		expect(client.isConnected()).toBe(true);
+		expect(client.assignedAddress).toMatch(/^pinch:.+@localhost$/);
+
+		await waitForConnections(1);
+		client.disconnect();
+		await waitForConnections(0);
+	});
+
 	it("disconnects cleanly and health shows 0 connections", async () => {
 		const client = await createClient();
 		await client.connect();
