@@ -89,7 +89,10 @@ export class RelayClient {
 				reject(err);
 			};
 
-			const url = `${this.relayUrl}/ws`;
+			const normalizedRelayUrl = this.relayUrl.replace(/\/+$/, "");
+			const url = normalizedRelayUrl.endsWith("/ws")
+				? normalizedRelayUrl
+				: `${normalizedRelayUrl}/ws`;
 			this.ws = new WebSocket(url);
 
 			const authTimer = setTimeout(() => {
