@@ -83,6 +83,21 @@ describe("saveKeypair and loadKeypair", () => {
 		}
 	});
 
+	it("creates parent directories when saving a new keypair path", async () => {
+		const kp = await generateKeypair();
+		const tmpDir = mkdtempSync(join(tmpdir(), "pinch-test-nested-"));
+		const keyPath = join(tmpDir, ".pinch", "keypair.json");
+
+		try {
+			await saveKeypair(kp, keyPath);
+			const loaded = await loadKeypair(keyPath);
+			expect(bytesToHex(loaded.publicKey)).toBe(bytesToHex(kp.publicKey));
+			expect(bytesToHex(loaded.privateKey)).toBe(bytesToHex(kp.privateKey));
+		} finally {
+			rmSync(tmpDir, { recursive: true, force: true });
+		}
+	});
+
 	it("writes new keypair files with owner-only permissions", async () => {
 		const kp = await generateKeypair();
 		const tmpDir = mkdtempSync(join(tmpdir(), "pinch-test-perms-"));

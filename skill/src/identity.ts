@@ -8,7 +8,8 @@
  */
 
 import { createHash } from "node:crypto";
-import { chmod, readFile, writeFile } from "node:fs/promises";
+import { mkdir, chmod, readFile, writeFile } from "node:fs/promises";
+import { dirname } from "node:path";
 import sodium from "libsodium-wrappers-sumo";
 import bs58 from "bs58";
 import { ensureSodiumReady } from "./crypto.js";
@@ -49,6 +50,8 @@ export async function saveKeypair(
 	keypair: Keypair,
 	path: string,
 ): Promise<void> {
+	await mkdir(dirname(path), { recursive: true });
+
 	const data: KeypairFile = {
 		version: 1,
 		public_key: sodium.to_base64(

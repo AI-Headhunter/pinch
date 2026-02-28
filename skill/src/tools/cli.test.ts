@@ -19,10 +19,12 @@ describe("isToolEntrypoint", () => {
 	it("matches tool ts/js script names", () => {
 		expect(isToolEntrypoint("/tmp/pinch-accept.ts", "pinch-accept")).toBe(true);
 		expect(isToolEntrypoint("/tmp/pinch-accept.js", "pinch-accept")).toBe(true);
+		expect(isToolEntrypoint("/opt/homebrew/bin/pinch-accept", "pinch-accept")).toBe(true);
 	});
 
 	it("rejects unrelated scripts", () => {
 		expect(isToolEntrypoint("/tmp/pinch-send.js", "pinch-accept")).toBe(false);
+		expect(isToolEntrypoint("/tmp/pinch-accept-old", "pinch-accept")).toBe(false);
 		expect(isToolEntrypoint(undefined, "pinch-accept")).toBe(false);
 	});
 });

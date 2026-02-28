@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 /**
  * pinch_permissions -- View and configure the permissions manifest for a connection.
  *
@@ -17,7 +18,7 @@
  *               { "error": "..." } for errors
  */
 
-import { bootstrapLocal, shutdownLocal } from "./cli.js";
+import { bootstrapLocal, runToolEntrypoint, shutdownLocal } from "./cli.js";
 import type {
 	CalendarPermission,
 	FilePermission,
@@ -270,14 +271,4 @@ export async function run(args: string[]): Promise<void> {
 	await shutdownLocal();
 }
 
-// Self-executable entry point.
-if (
-	process.argv[1] &&
-	(process.argv[1].endsWith("pinch-permissions.ts") ||
-		process.argv[1].endsWith("pinch-permissions.js"))
-) {
-	run(process.argv.slice(2)).catch((err) => {
-		console.error(JSON.stringify({ error: String(err.message ?? err) }));
-		process.exit(1);
-	});
-}
+runToolEntrypoint("pinch-permissions", run);

@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 /**
  * pinch-claim -- Approve a pending agent registration (operator tool).
  *
@@ -57,7 +58,8 @@ export async function run(args: string[]): Promise<void> {
 // Self-executable entry point.
 if (
 	process.argv[1] &&
-	(process.argv[1].endsWith("pinch-claim.ts") ||
+	(process.argv[1].endsWith("pinch-claim") ||
+		process.argv[1].endsWith("pinch-claim.ts") ||
 		process.argv[1].endsWith("pinch-claim.js"))
 ) {
 	run(process.argv.slice(2)).catch((err) => {

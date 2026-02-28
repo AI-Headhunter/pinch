@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 /**
  * pinch_audit_export -- Export the audit log to a JSON file for independent verification.
  *
@@ -12,7 +13,7 @@
  */
 
 import { writeFile } from "node:fs/promises";
-import { bootstrapLocal, shutdownLocal } from "./cli.js";
+import { bootstrapLocal, runToolEntrypoint, shutdownLocal } from "./cli.js";
 
 /** Parsed CLI arguments for pinch-audit-export. */
 export interface AuditExportArgs {
@@ -117,14 +118,4 @@ export async function run(args: string[]): Promise<void> {
 	await shutdownLocal();
 }
 
-// Self-executable entry point.
-if (
-	process.argv[1] &&
-	(process.argv[1].endsWith("pinch-audit-export.ts") ||
-		process.argv[1].endsWith("pinch-audit-export.js"))
-) {
-	run(process.argv.slice(2)).catch((err) => {
-		console.error(JSON.stringify({ error: String(err.message ?? err) }));
-		process.exit(1);
-	});
-}
+runToolEntrypoint("pinch-audit-export", run);

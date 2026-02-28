@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 /**
  * pinch_connect -- Send a connection request to a pinch address.
  *
@@ -7,7 +8,7 @@
  * Outputs JSON: { "status": "request_sent", "to": "<address>" }
  */
 
-import { bootstrap, shutdown } from "./cli.js";
+import { bootstrap, runToolEntrypoint, shutdown } from "./cli.js";
 
 /** Parse CLI arguments into a structured object. */
 export function parseArgs(args: string[]): {
@@ -47,14 +48,4 @@ export async function run(args: string[]): Promise<void> {
 	await shutdown();
 }
 
-// Self-executable entry point.
-if (
-	process.argv[1] &&
-	(process.argv[1].endsWith("pinch-connect.ts") ||
-		process.argv[1].endsWith("pinch-connect.js"))
-) {
-	run(process.argv.slice(2)).catch((err) => {
-		console.error(JSON.stringify({ error: String(err.message ?? err) }));
-		process.exit(1);
-	});
-}
+runToolEntrypoint("pinch-connect", run);

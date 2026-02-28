@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 /**
  * pinch_audit_verify -- Verify the integrity of the tamper-evident audit log hash chain.
  *
@@ -12,7 +13,7 @@
  *   On failure: { valid: false, total_entries, first_broken_at, broken_index, expected_hash, actual_hash }
  */
 
-import { bootstrapLocal, shutdownLocal } from "./cli.js";
+import { bootstrapLocal, runToolEntrypoint, shutdownLocal } from "./cli.js";
 import { computeEntryHash } from "../autonomy/activity-feed.js";
 
 /** Parsed CLI arguments for pinch-audit-verify. */
@@ -188,14 +189,4 @@ export async function run(args: string[]): Promise<void> {
 	await shutdownLocal();
 }
 
-// Self-executable entry point.
-if (
-	process.argv[1] &&
-	(process.argv[1].endsWith("pinch-audit-verify.ts") ||
-		process.argv[1].endsWith("pinch-audit-verify.js"))
-) {
-	run(process.argv.slice(2)).catch((err) => {
-		console.error(JSON.stringify({ error: String(err.message ?? err) }));
-		process.exit(1);
-	});
-}
+runToolEntrypoint("pinch-audit-verify", run);
