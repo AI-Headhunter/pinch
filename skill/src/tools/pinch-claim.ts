@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 /**
  * pinch-claim -- Approve a pending agent registration (operator tool).
  *

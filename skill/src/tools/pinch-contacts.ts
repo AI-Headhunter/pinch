@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 /**
  * pinch_contacts -- List connections with status and autonomy level.
  *

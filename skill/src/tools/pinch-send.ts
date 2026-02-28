@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 /**
  * pinch_send -- Encrypt and send a message to a connected peer.
  *

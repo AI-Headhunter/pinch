@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 /**
  * pinch_intervene -- Enter/exit passthrough mode and send human-attributed messages.
  *

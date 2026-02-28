@@ -112,6 +112,20 @@ describe("saveKeypair and loadKeypair", () => {
 			rmSync(tmpDir, { recursive: true, force: true });
 		}
 	});
+
+	it("creates parent directories when saving a keypair", async () => {
+		const kp = await generateKeypair();
+		const tmpDir = mkdtempSync(join(tmpdir(), "pinch-test-nested-"));
+		const keyPath = join(tmpDir, ".pinch", "identity.json");
+
+		try {
+			await saveKeypair(kp, keyPath);
+			const loaded = await loadKeypair(keyPath);
+			expect(bytesToHex(loaded.publicKey)).toBe(bytesToHex(kp.publicKey));
+		} finally {
+			rmSync(tmpDir, { recursive: true, force: true });
+		}
+	});
 });
 
 describe("generateAddress", () => {

@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 /**
  * pinch_connect -- Send a connection request to a pinch address.
  *

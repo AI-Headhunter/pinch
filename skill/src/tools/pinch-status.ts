@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 /**
  * pinch_status -- Return delivery state for a message_id.
  *

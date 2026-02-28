@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 /**
  * pinch_mute -- Mute or unmute a connection.
  *

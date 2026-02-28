@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 /**
  * pinch_reject -- Silently reject a pending inbound connection request.
  *

@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 /**
  * pinch_activity -- Query the unified event log.
  *

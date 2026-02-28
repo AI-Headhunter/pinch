@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 /**
  * pinch_audit_verify -- Verify the integrity of the tamper-evident audit log hash chain.
  *

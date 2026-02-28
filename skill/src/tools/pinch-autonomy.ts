@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 /**
  * pinch_autonomy -- Set the autonomy level for a connection.
  *

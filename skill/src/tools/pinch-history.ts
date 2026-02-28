@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 /**
  * pinch_history -- Return paginated message history.
  *

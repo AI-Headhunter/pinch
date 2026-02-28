@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 /**
  * pinch_permissions -- View and configure the permissions manifest for a connection.
  *

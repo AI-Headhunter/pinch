@@ -28,6 +28,7 @@
     "pinch-claim": "./dist/tools/pinch-claim.js"
   },
   "scripts": {
+    "prebuild": "pnpm --dir ../gen/ts build",
     "build": "tsc",
     "test": "vitest run",
     "lint": "biome check ."

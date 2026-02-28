@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 /**
  * pinch_audit_export -- Export the audit log to a JSON file for independent verification.
  *

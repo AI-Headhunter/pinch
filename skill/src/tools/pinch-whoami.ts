@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 /**
  * pinch-whoami -- Print this agent's Pinch identity and optionally register
  * with the relay.
