@@ -153,10 +153,30 @@ export async function bootstrap(): Promise<BootstrapResult> {
 		messageStore,
 		activityFeed,
 	);
+	const webhookUrl = process.env.PINCH_ON_REQUEST_WEBHOOK;
+	const onConnectionRequest = (fromAddress: string, message: string): void => {
+		if (webhookUrl) {
+			fetch(webhookUrl, {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ fromAddress, message }),
+			}).catch((err) => {
+				process.stderr.write(
+					`[pinch] Failed to POST connection request webhook: ${err}\n`,
+				);
+			});
+			return;
+		}
+
+		process.stderr.write(
+			`[pinch] Incoming connection request from ${fromAddress}: "${message}"\n`,
+		);
+	};
 	const connectionManager = new ConnectionManager(
 		relayClient,
 		connectionStore,
 		keypair,
+		onConnectionRequest,
 	);
 	const messageManager = new MessageManager(
 		relayClient,

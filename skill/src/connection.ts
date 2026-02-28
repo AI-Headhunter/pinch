@@ -42,6 +42,10 @@ export class ConnectionManager {
 		private relayClient: RelayClient,
 		private connectionStore: ConnectionStore,
 		private keypair?: Keypair,
+		private onConnectionRequest?: (
+			fromAddress: string,
+			message: string,
+		) => void,
 	) {}
 
 	/**
@@ -131,6 +135,10 @@ export class ConnectionManager {
 				: undefined,
 		});
 		await this.connectionStore.save();
+
+		// Notify host agent after persistence so callback handlers can safely
+		// approve/reject immediately against stored state.
+		this.onConnectionRequest?.(request.fromAddress, request.message);
 	}
 
 	/**
