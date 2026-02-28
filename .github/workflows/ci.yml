@@ -47,8 +47,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Build skill
-        run: pnpm -C skill build
+      - name: Build workspace
+        run: pnpm run build
+
+      - name: Install/build smoke test
+        run: pnpm run test:install-smoke
 
       - name: Test skill tools
         run: pnpm -C skill exec vitest run src/tools

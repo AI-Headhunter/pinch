@@ -27,6 +27,7 @@
     "pinch-whoami": "./dist/tools/pinch-whoami.js"
   },
   "scripts": {
+    "prebuild": "pnpm --dir ../gen/ts build",
     "build": "tsc",
     "test": "vitest run",
     "lint": "biome check ."
