@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 /**
  * pinch-whoami -- Print this agent's Pinch identity and optionally register
  * with the relay.
@@ -83,7 +84,8 @@ export async function run(args: string[]): Promise<void> {
 // Self-executable entry point.
 if (
 	process.argv[1] &&
-	(process.argv[1].endsWith("pinch-whoami.ts") ||
+	(process.argv[1].endsWith("pinch-whoami") ||
+		process.argv[1].endsWith("pinch-whoami.ts") ||
 		process.argv[1].endsWith("pinch-whoami.js"))
 ) {
 	run(process.argv.slice(2)).catch((err) => {

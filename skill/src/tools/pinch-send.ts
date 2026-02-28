@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 /**
  * pinch_send -- Encrypt and send a message to a connected peer.
  *
@@ -7,7 +8,7 @@
  * Outputs JSON: { "message_id": "<id>", "status": "sent" }
  */
 
-import { bootstrap, shutdown } from "./cli.js";
+import { bootstrap, runToolEntrypoint, shutdown } from "./cli.js";
 
 /** Parse CLI arguments into a structured object. */
 export function parseArgs(args: string[]): {
@@ -70,14 +71,4 @@ export async function run(args: string[]): Promise<void> {
 	await shutdown();
 }
 
-// Self-executable entry point.
-if (
-	process.argv[1] &&
-	(process.argv[1].endsWith("pinch-send.ts") ||
-		process.argv[1].endsWith("pinch-send.js"))
-) {
-	run(process.argv.slice(2)).catch((err) => {
-		console.error(JSON.stringify({ error: String(err.message ?? err) }));
-		process.exit(1);
-	});
-}
+runToolEntrypoint("pinch-send", run);

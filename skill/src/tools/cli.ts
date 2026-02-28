@@ -11,7 +11,7 @@
  */
 
 import { homedir } from "node:os";
-import { join } from "node:path";
+import { basename, join } from "node:path";
 import { ActivityFeed } from "../autonomy/activity-feed.js";
 import { CircuitBreaker } from "../autonomy/circuit-breaker.js";
 import { EnforcementPipeline } from "../autonomy/enforcement-pipeline.js";
@@ -63,9 +63,13 @@ export function isToolEntrypoint(
 	toolName: string,
 ): boolean {
 	if (!scriptPath) return false;
+	const scriptName = basename(scriptPath);
 	return (
-		scriptPath.endsWith(`${toolName}.ts`) ||
-		scriptPath.endsWith(`${toolName}.js`)
+		scriptName === toolName ||
+		scriptName === `${toolName}.ts` ||
+		scriptName === `${toolName}.js` ||
+		scriptName === `${toolName}.mjs` ||
+		scriptName === `${toolName}.cjs`
 	);
 }
 

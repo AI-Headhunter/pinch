@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 /**
  * pinch_autonomy -- Set the autonomy level for a connection.
  *
@@ -7,7 +8,7 @@
  * Outputs JSON: { "address": "...", "previous_level": "...", "new_level": "...", "policy": "..." }
  */
 
-import { bootstrap, shutdown } from "./cli.js";
+import { bootstrap, runToolEntrypoint, shutdown } from "./cli.js";
 import type { AutonomyLevel } from "../connection-store.js";
 
 const VALID_LEVELS: AutonomyLevel[] = [
@@ -121,14 +122,4 @@ export async function run(args: string[]): Promise<void> {
 	await shutdown();
 }
 
-// Self-executable entry point.
-if (
-	process.argv[1] &&
-	(process.argv[1].endsWith("pinch-autonomy.ts") ||
-		process.argv[1].endsWith("pinch-autonomy.js"))
-) {
-	run(process.argv.slice(2)).catch((err) => {
-		console.error(JSON.stringify({ error: String(err.message ?? err) }));
-		process.exit(1);
-	});
-}
+runToolEntrypoint("pinch-autonomy", run);
